@@ -1,0 +1,19 @@
+WEBVTT
+
+NOTE
+Sprint 24 Sync Video Recording Subtitles
+
+00:00:01.000 --> 00:00:04.500
+<v Alice>Welcome to today's technical sync team.</v>
+
+00:00:05.100 --> 00:00:09.800
+<v Bob>I will implement the OAuth2 token refresh endpoint for the backend API by Thursday.</v>
+
+00:00:10.200 --> 00:00:15.300
+<v Charlie>On the frontend, I will fix the dropdown menu bug in the navigation bar today.</v>
+
+00:00:16.000 --> 00:00:20.500
+<v Dana>I will configure Terraform scripts for our staging database backup policy by Friday.</v>
+
+00:00:21.000 --> 00:00:25.000
+<v Alice>Great commitments everyone. Let's make sure all PRs are reviewed promptly.</v>

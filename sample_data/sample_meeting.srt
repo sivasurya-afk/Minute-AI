@@ -1,0 +1,19 @@
+1
+00:00:01,000 --> 00:00:03,500
+Alice: Good morning everyone, let's start the postmortem.
+
+2
+00:00:04,000 --> 00:00:08,200
+Bob: The latency issue was due to an unindexed query on users.
+
+3
+00:00:08,500 --> 00:00:13,000
+Bob: I will add the missing B-tree index to PostgreSQL by 2 PM today.
+
+4
+00:00:13,500 --> 00:00:18,000
+Dana: I will set up Prometheus alerts for database connection pool exhaustion by Wednesday.
+
+5
+00:00:18,500 --> 00:00:22,000
+Alice: Perfect, thank you Bob and Dana.
