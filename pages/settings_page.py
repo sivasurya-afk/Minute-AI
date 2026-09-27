@@ -16,10 +16,10 @@ def render_settings_page(user_id: str, access_token: Optional[str] = None):
     st.markdown(
         """
         <div style="margin-bottom: 1.2rem;">
-            <h1 style="font-size: 2.1rem; font-weight: 800; color: #F8FAFC; margin: 0; letter-spacing: -0.03em;">
+            <h1 style="font-size: 2.1rem; font-weight: 800; color: #111827; margin: 0; letter-spacing: -0.03em;">
                 Settings
             </h1>
-            <p style="color: #94A3B8; font-size: 0.95rem; margin-top: 4px;">
+            <p style="color: #6B7280; font-size: 0.95rem; margin-top: 4px;">
                 Manage AI model parameters, confidence classification thresholds, and environment connectivity.
             </p>
         </div>
@@ -109,8 +109,8 @@ def render_settings_page(user_id: str, access_token: Optional[str] = None):
                 st.markdown(
                     """
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="font-weight: 700; font-size: 1.05rem; color: #F8FAFC;">Groq Cloud API</span>
-                        <span style="background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 6px;">
+                        <span style="font-weight: 700; font-size: 1.05rem; color: #111827;">Groq Cloud API</span>
+                        <span style="background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 6px;">
                             Active & Ready
                         </span>
                     </div>
@@ -131,13 +131,15 @@ def render_settings_page(user_id: str, access_token: Optional[str] = None):
                 client = get_supabase_client(access_token)
                 is_connected = client is not None
                 supa_status_label = "Cloud Connected" if is_connected else "MCP / Demo Active"
-                supa_color = "#34D399" if is_connected else "#60A5FA"
+                supa_color = "#059669" if is_connected else "#4F46E5"
+                supa_bg = "#ECFDF5" if is_connected else "#EEF2FF"
+                supa_border = "#A7F3D0" if is_connected else "#C7D2FE"
 
                 st.markdown(
                     f"""
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="font-weight: 700; font-size: 1.05rem; color: #F8FAFC;">Supabase PostgreSQL</span>
-                        <span style="background: rgba(99, 102, 241, 0.15); color: {supa_color}; border: 1px solid {supa_color}44; font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 6px;">
+                        <span style="font-weight: 700; font-size: 1.05rem; color: #111827;">Supabase PostgreSQL</span>
+                        <span style="background: {supa_bg}; color: {supa_color}; border: 1px solid {supa_border}; font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 6px;">
                             {supa_status_label}
                         </span>
                     </div>

@@ -1,6 +1,6 @@
 """
 Transcript Upload and AI Processing page.
-Modern Dark Enterprise SaaS workflow for Paste text, .txt, .vtt, .srt, and Audio files (Groq Whisper Large V3).
+Stitch Design System: Executive Precision (Warm Minimalist Light Mode, Multi-Format Workstation).
 """
 
 from typing import Optional
@@ -23,15 +23,15 @@ def render_process_transcript_page(user_id: str, access_token: Optional[str] = N
     # Header
     st.markdown(
         """
-        <div style="margin-bottom: 1.2rem;">
-            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; color: #A5B4FC; margin-bottom: 8px;">
-                ⚡ Groq High-Speed AI Pipeline
+        <div style="margin-bottom: 1rem;">
+            <div style="display: inline-flex; align-items: center; gap: 6px; background: #EEF2FF; border: 1px solid #C7D2FE; padding: 3px 9px; border-radius: 9999px; font-size: 0.73rem; font-weight: 700; color: #4338CA; margin-bottom: 6px;">
+                ⚡ Groq High-Velocity Inference Engine
             </div>
-            <h1 style="font-size: 2.1rem; font-weight: 800; color: #F8FAFC; margin: 0; letter-spacing: -0.03em;">
+            <h1 style="font-size: 1.85rem; font-weight: 800; color: #111827; margin: 0; letter-spacing: -0.025em;">
                 Process Meeting Transcript
             </h1>
-            <p style="color: #94A3B8; font-size: 0.95rem; margin-top: 4px;">
-                Extract actionable engineering tasks, commitments, and Jira project mappings using Groq AI.
+            <p style="color: #6B7280; font-size: 0.9rem; margin-top: 3px;">
+                Extract actionable engineering tasks, team commitments, and Jira project mappings using Groq AI.
             </p>
         </div>
         """,
@@ -47,20 +47,20 @@ def render_process_transcript_page(user_id: str, access_token: Optional[str] = N
     if not active_projects:
         st.warning(
             "⚠️ **No active Jira projects configured.** The AI needs target projects to classify action items. "
-            "Please go to **Jira Projects** to register your projects.",
+            "Please visit **Jira Projects** in the top navigation to add your projects.",
             icon="⚠️",
         )
     else:
         # Active projects chips
         chips_html = " ".join([
-            f'<span style="background: rgba(99, 102, 241, 0.12); color: #A5B4FC; border: 1px solid rgba(99, 102, 241, 0.3); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">'
-            f'🏷️ {p["project_key"]} <span style="color: #64748B;">({p["project_name"]})</span></span>'
+            f'<span style="background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; padding: 3px 8px; border-radius: 6px; font-size: 0.74rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">'
+            f'🏷️ {p["project_key"]} <span style="color: #6B7280; font-weight: 400;">({p["project_name"]})</span></span>'
             for p in active_projects
         ])
         st.markdown(
             f"""
-            <div style="background: #111827; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 10px 14px; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <span style="font-size: 0.78rem; font-weight: 700; color: #94A3B8; text-transform: uppercase;">Active Jira Context:</span>
+            <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 10px 14px; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                <span style="font-size: 0.76rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.04em;">Active Jira Context:</span>
                 {chips_html}
             </div>
             """,
@@ -99,7 +99,7 @@ def render_process_transcript_page(user_id: str, access_token: Optional[str] = N
     with tab_paste:
         raw_text_input = st.text_area(
             "Paste Meeting Discussion Text",
-            height=240,
+            height=220,
             placeholder=(
                 "Alice: Good morning team. Let's align on Sprint 24 deliverables.\n"
                 "Bob: I will implement the new token refresh endpoint for the auth service by Thursday. It is high priority.\n"
@@ -144,9 +144,9 @@ def render_process_transcript_page(user_id: str, access_token: Optional[str] = N
     with tab_audio:
         st.markdown(
             """
-            <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 8px; padding: 10px 14px; margin-bottom: 10px;">
-                <div style="font-weight: 600; color: #A5B4FC; font-size: 0.85rem;">🎙️ Groq Whisper Large V3 Speech-to-Text</div>
-                <div style="font-size: 0.75rem; color: #94A3B8;">Upload meeting audio recording up to 25 MB (MP3, WAV, M4A, OGG, WEBM, FLAC).</div>
+            <div style="background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 8px; padding: 10px 14px; margin-bottom: 10px;">
+                <div style="font-weight: 700; color: #4338CA; font-size: 0.85rem;">🎙️ Groq Whisper Large V3 Speech-to-Text</div>
+                <div style="font-size: 0.75rem; color: #4B5563;">Upload meeting audio recording up to 25 MB (MP3, WAV, M4A, OGG, WEBM, FLAC).</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -174,24 +174,24 @@ def render_process_transcript_page(user_id: str, access_token: Optional[str] = N
     if cleaned_transcript:
         meta = TranscriptParser.get_metadata(cleaned_transcript)
         speaker_pills = " ".join([
-            f'<span style="background: rgba(255,255,255,0.06); color: #CBD5E1; padding: 2px 7px; border-radius: 4px; font-size: 0.72rem;">👤 {s}</span>'
+            f'<span style="background: #F3F4F6; color: #374151; padding: 2px 7px; border-radius: 4px; font-size: 0.72rem; font-weight: 500;">👤 {s}</span>'
             for s in meta.get("speakers", [])[:6]
         ])
 
         st.markdown(
             f"""
-            <div style="background: #111827; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px 16px; margin: 1.2rem 0;">
+            <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 10px; padding: 12px 16px; margin: 1.2rem 0; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
-                    <div style="display: flex; align-items: center; gap: 12px; font-size: 0.85rem; color: #F8FAFC;">
+                    <div style="display: flex; align-items: center; gap: 12px; font-size: 0.85rem; color: #111827;">
                         <span>📊 <b>{meta['word_count']}</b> words</span>
-                        <span style="color: #64748B;">•</span>
-                        <span>⏱️ <b>~{meta['estimated_minutes']}</b> min meeting</span>
-                        <span style="color: #64748B;">•</span>
+                        <span style="color: #D1D5DB;">•</span>
+                        <span>⏱️ <b>~{meta['estimated_minutes']}</b> min read</span>
+                        <span style="color: #D1D5DB;">•</span>
                         <span>🗣️ <b>{meta['speaker_count']}</b> speakers detected</span>
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                    {speaker_pills or '<span style="color: #64748B; font-size: 0.75rem;">No explicit speaker prefixes</span>'}
+                    {speaker_pills or '<span style="color: #9CA3AF; font-size: 0.75rem;">No explicit speaker prefixes</span>'}
                 </div>
             </div>
             """,
@@ -244,7 +244,6 @@ def render_process_transcript_page(user_id: str, access_token: Optional[str] = N
             return
 
         with st.status("Running Groq AI Intelligence Pipeline...", expanded=True) as status_box:
-            # 1. Save transcript record
             status_box.write("💾 Storing meeting transcript record...")
             transcript_record = transcript_repo.create_transcript(
                 user_id=user_id,
@@ -258,7 +257,6 @@ def render_process_transcript_page(user_id: str, access_token: Optional[str] = N
             )
             transcript_id = transcript_record["id"]
 
-            # 2. Extract action items with Groq LLM
             status_box.write("🤖 Extracting action items and mapping Jira targets...")
             groq_service = GroqService.get_instance()
 
@@ -281,7 +279,6 @@ def render_process_transcript_page(user_id: str, access_token: Optional[str] = N
 
             status_box.write(f"✨ Extracted {len(extracted_items)} actionable commitments!")
 
-            # 3. Store in action items repository
             status_box.write("💾 Storing action items in database...")
             action_repo.bulk_create_action_items(
                 user_id=user_id,
@@ -289,14 +286,13 @@ def render_process_transcript_page(user_id: str, access_token: Optional[str] = N
                 items=extracted_items,
             )
 
-            # 4. Mark transcript as processed
             transcript_repo.update_status(user_id, transcript_id, "processed")
             status_box.update(label="Processing Complete!", state="complete")
 
         st.success(f"🎉 Successfully extracted {len(extracted_items)} action items!")
 
         # Immediate preview of extracted items
-        st.markdown("### 📋 Extracted Action Items")
+        st.markdown("### 📋 Extracted Action Items Preview")
         created_items = action_repo.get_action_items(user_id, filters={"transcript_id": transcript_id})
 
         for idx, item in enumerate(created_items):

@@ -142,17 +142,17 @@ def render_auth_page():
         st.markdown(
             """
             <div style="text-align: center; margin-bottom: 2rem; margin-top: 1rem;">
-                <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, #6366F1, #8B5CF6); display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 0 25px rgba(99, 102, 241, 0.4); margin-bottom: 12px;">
+                <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, #4F46E5, #6366F1); display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25); margin-bottom: 12px;">
                     ⏱️
                 </div>
-                <h1 style="margin: 0; font-size: 2.2rem; font-weight: 800; color: #F8FAFC; letter-spacing: -0.03em;">Minute AI</h1>
-                <p style="color: #94A3B8; font-size: 0.95rem; margin-top: 6px;">
+                <h1 style="margin: 0; font-size: 2.2rem; font-weight: 800; color: #111827; letter-spacing: -0.03em;">Minute AI</h1>
+                <p style="color: #6B7280; font-size: 0.95rem; margin-top: 6px;">
                     AI-Powered Meeting Transcript to Jira Action Item Dashboard
                 </p>
                 <div style="display: inline-flex; gap: 8px; margin-top: 4px;">
-                    <span style="background: rgba(99, 102, 241, 0.12); color: #A5B4FC; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Groq Whisper V3</span>
-                    <span style="background: rgba(16, 185, 129, 0.12); color: #34D399; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Qwen 2.5 AI</span>
-                    <span style="background: rgba(56, 189, 248, 0.12); color: #7DD3FC; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Supabase RLS</span>
+                    <span style="background: #EEF2FF; color: #4F46E5; border: 1px solid #C7D2FE; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Groq Whisper V3</span>
+                    <span style="background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Qwen 2.5 AI</span>
+                    <span style="background: #E0F2FE; color: #0284C7; border: 1px solid #BAE6FD; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Supabase RLS</span>
                 </div>
             </div>
             """,
@@ -164,9 +164,9 @@ def render_auth_page():
         if not has_supabase:
             st.markdown(
                 """
-                <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px;">
-                    <div style="font-weight: 700; color: #A5B4FC; font-size: 0.85rem; margin-bottom: 2px;">⚡ Instant Demo & Evaluation Ready</div>
-                    <div style="font-size: 0.78rem; color: #94A3B8; line-height: 1.4;">
+                <div style="background: #EEF2FF; border: 1px solid #C7D2FE; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px;">
+                    <div style="font-weight: 700; color: #4338CA; font-size: 0.85rem; margin-bottom: 2px;">⚡ Instant Demo & Evaluation Ready</div>
+                    <div style="font-size: 0.78rem; color: #4B5563; line-height: 1.4;">
                         Supabase credentials can be connected anytime. You can explore all features right now with <b>Demo Mode</b>.
                     </div>
                 </div>
@@ -180,10 +180,10 @@ def render_auth_page():
             st.markdown(
                 """
                 <div style="padding: 10px 0;">
-                    <p style="font-size: 0.88rem; color: #CBD5E1; line-height: 1.5;">
+                    <p style="font-size: 0.88rem; color: #374151; line-height: 1.5;">
                         Test Minute AI immediately with pre-loaded mock data and live Groq AI extraction:
                     </p>
-                    <ul style="font-size: 0.82rem; color: #94A3B8; line-height: 1.6;">
+                    <ul style="font-size: 0.82rem; color: #4B5563; line-height: 1.6;">
                         <li>Pre-loaded with 3 Jira projects (Frontend, Core API, DevOps)</li>
                         <li>Sample meetings with verified action items and priorities</li>
                         <li>Full access to Plotly charts, multi-format transcript upload, and exports</li>

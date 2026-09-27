@@ -1,6 +1,6 @@
 """
 Main Dashboard view for Minute AI.
-Modern Dark Enterprise SaaS Analytics with Plotly Charts and Real-Time Metrics.
+Stitch Design System: Executive Precision (Warm Minimalist Light Mode, 12-Column Grid).
 """
 
 import streamlit as st
@@ -12,74 +12,79 @@ from utils.helpers import get_status_badge, format_iso_date
 
 
 def render_dashboard_page(user_id: str, access_token: str = None):
-    # Hero Section
-    col_hero_left, col_hero_right = st.columns([3.5, 1.5])
-    with col_hero_left:
-        st.markdown(
-            """
-            <div style="margin-bottom: 1.2rem;">
-                <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; color: #A5B4FC; margin-bottom: 8px;">
-                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #10B981; box-shadow: 0 0 8px #10B981;"></span>
-                    Live AI Engine Connected • Whisper V3 & Qwen 2.5
-                </div>
-                <h1 style="font-size: 2.2rem; font-weight: 800; color: #F8FAFC; margin: 0; letter-spacing: -0.03em;">
-                    Meeting Intelligence Dashboard
-                </h1>
-                <p style="color: #94A3B8; font-size: 0.95rem; margin-top: 4px;">
-                    Automated meeting action item extraction, Jira project mappings, and team commitment tracking.
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with col_hero_right:
-        st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-        if st.button("⚡ Process New Transcript", type="primary", use_container_width=True):
-            st.session_state["nav_selection"] = "Process Transcript"
-            st.rerun()
-
     action_repo = ActionItemRepository(access_token)
     transcript_repo = TranscriptRepository(access_token)
     project_repo = ProjectRepository(access_token)
 
-    # Fetch Metrics
+    # 1. Executive Welcome Hero Banner
+    col_hero_text, col_hero_action = st.columns([3.8, 1.2])
+    with col_hero_text:
+        st.markdown(
+            """
+            <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 14px; padding: 18px 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); margin-bottom: 1.2rem;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <span style="background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; font-size: 0.72rem; font-weight: 700; padding: 2px 7px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px;">
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #10B981;"></span>
+                        Live AI Engine Online
+                    </span>
+                    <span style="color: #9CA3AF; font-size: 0.8rem;">•</span>
+                    <span style="font-size: 0.78rem; color: #6B7280; font-weight: 500;">Whisper Large V3 & Qwen 2.5</span>
+                </div>
+                <h2 style="font-size: 1.65rem; font-weight: 800; color: #111827; margin: 0 0 4px 0; letter-spacing: -0.025em;">
+                    Meeting Action Item Intelligence
+                </h2>
+                <div style="font-size: 0.88rem; color: #4B5563; line-height: 1.4;">
+                    Transforming conversational meeting audio & transcripts into reviewable, classified Jira action items.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with col_hero_action:
+        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        if st.button("➕ Process Transcript", type="primary", use_container_width=True):
+            st.session_state["nav_selection"] = "Process Transcript"
+            st.rerun()
+
+    # 2. Fetch Dynamic KPI Metrics
     metrics = action_repo.get_dashboard_metrics(user_id)
 
-    # 1. Sleek Metric Cards
+    # 3. 6 Summary Cards
     c1, c2, c3, c4, c5, c6 = st.columns(6)
 
-    def render_metric_card(title, value, subtitle, icon, color):
+    def render_kpi_card(title, value, subtitle, icon, text_color):
         return f"""
-        <div style="background: #111827; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); position: relative; overflow: hidden;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 0.72rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.06em;">{title}</span>
-                <span style="font-size: 1.1rem;">{icon}</span>
+        <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 0.72rem; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em;">{title}</span>
+                <span style="font-size: 1.05rem;">{icon}</span>
             </div>
-            <div style="font-size: 1.85rem; font-weight: 800; color: #F8FAFC; letter-spacing: -0.02em; line-height: 1;">
+            <div style="font-size: 1.95rem; font-weight: 800; color: #111827; letter-spacing: -0.03em; line-height: 1.1;">
                 {value}
             </div>
-            <div style="font-size: 0.72rem; font-weight: 600; color: {color}; margin-top: 6px;">
+            <div style="font-size: 0.73rem; font-weight: 600; color: {text_color}; margin-top: 5px;">
                 {subtitle}
             </div>
         </div>
         """
 
     with c1:
-        st.markdown(render_metric_card("Transcripts", metrics["total_transcripts"], "Uploaded meetings", "📜", "#94A3B8"), unsafe_allow_html=True)
+        st.markdown(render_kpi_card("Transcripts", metrics["total_transcripts"], "Meetings analyzed", "📜", "#6B7280"), unsafe_allow_html=True)
     with c2:
-        st.markdown(render_metric_card("Action Items", metrics["total_action_items"], "Extracted tasks", "🎯", "#60A5FA"), unsafe_allow_html=True)
+        st.markdown(render_kpi_card("Action Items", metrics["total_action_items"], "Extracted tasks", "🎯", "#4F46E5"), unsafe_allow_html=True)
     with c3:
-        st.markdown(render_metric_card("Awaiting Review", metrics["awaiting_review"], "Needs sign-off", "⏳", "#FBBF24" if metrics["awaiting_review"] > 0 else "#94A3B8"), unsafe_allow_html=True)
+        st.markdown(render_kpi_card("Pending Review", metrics["awaiting_review"], "Awaiting approval", "⏳", "#D97706" if metrics["awaiting_review"] > 0 else "#6B7280"), unsafe_allow_html=True)
     with c4:
-        st.markdown(render_metric_card("Clarifications", metrics["requiring_clarification"], "Flagged by AI", "❓", "#A5B4FC" if metrics["requiring_clarification"] > 0 else "#94A3B8"), unsafe_allow_html=True)
+        st.markdown(render_kpi_card("Clarifications", metrics["requiring_clarification"], "Flagged by AI", "❓", "#4338CA" if metrics["requiring_clarification"] > 0 else "#6B7280"), unsafe_allow_html=True)
     with c5:
-        st.markdown(render_metric_card("Approved", metrics["approved_items"], "Ready for Jira", "✅", "#34D399"), unsafe_allow_html=True)
+        st.markdown(render_kpi_card("Approved", metrics["approved_items"], "Ready for Jira", "✅", "#059669"), unsafe_allow_html=True)
     with c6:
-        st.markdown(render_metric_card("Jira Targets", metrics["jira_projects_count"], "Active projects", "📁", "#818CF8"), unsafe_allow_html=True)
+        st.markdown(render_kpi_card("Jira Targets", metrics["jira_projects_count"], "Active projects", "📁", "#3B82F6"), unsafe_allow_html=True)
 
     st.markdown("<div style='height: 1.4rem;'></div>", unsafe_allow_html=True)
 
-    # 2. Modern Plotly Analytics
+    # 4. Analytics & Charts
     all_items = action_repo.get_action_items(user_id)
 
     if all_items:
@@ -89,25 +94,24 @@ def render_dashboard_page(user_id: str, access_token: str = None):
 
         col_chart_left, col_chart_right = st.columns(2)
 
-        # Plotly dark template helper
-        def apply_dark_layout(fig, height=270):
+        def apply_stitch_light_layout(fig, height=270):
             fig.update_layout(
                 margin=dict(l=10, r=10, t=10, b=10),
                 height=height,
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(family="Plus Jakarta Sans, sans-serif", color="#94A3B8", size=11),
-                xaxis=dict(gridcolor="rgba(255,255,255,0.06)", zerolinecolor="rgba(255,255,255,0.06)"),
-                yaxis=dict(gridcolor="rgba(255,255,255,0.06)", zerolinecolor="rgba(255,255,255,0.06)"),
+                font=dict(family="Inter, sans-serif", color="#4B5563", size=11),
+                xaxis=dict(gridcolor="#F3F4F6", zerolinecolor="#E5E7EB"),
+                yaxis=dict(gridcolor="#F3F4F6", zerolinecolor="#E5E7EB"),
             )
             return fig
 
         with col_chart_left:
             st.markdown(
                 """
-                <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; margin-bottom: 1rem;">
-                    <div style="font-weight: 700; font-size: 0.95rem; color: #F8FAFC; margin-bottom: 4px;">📁 Tasks by Jira Project</div>
-                    <div style="font-size: 0.75rem; color: #64748B; margin-bottom: 12px;">Distribution across configured project keys</div>
+                <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                    <div style="font-weight: 700; font-size: 0.95rem; color: #111827; margin-bottom: 2px;">📁 Tasks by Jira Project</div>
+                    <div style="font-size: 0.75rem; color: #6B7280; margin-bottom: 12px;">Task volume distribution across configured Jira targets</div>
                 """,
                 unsafe_allow_html=True,
             )
@@ -120,14 +124,13 @@ def render_dashboard_page(user_id: str, access_token: str = None):
                 y="Tasks",
                 text="Tasks",
                 color="Project",
-                color_discrete_sequence=["#6366F1", "#8B5CF6", "#06B6D4", "#10B981", "#F59E0B"],
+                color_discrete_sequence=["#4F46E5", "#0D9488", "#0284C7", "#10B981", "#F59E0B"],
             )
             fig_proj.update_traces(
                 textposition="outside",
-                marker=dict(line=dict(width=0)),
                 width=0.45,
             )
-            apply_dark_layout(fig_proj)
+            apply_stitch_light_layout(fig_proj)
             fig_proj.update_layout(showlegend=False, xaxis_title="", yaxis_title="")
             st.plotly_chart(fig_proj, use_container_width=True)
             st.markdown("</div>", unsafe_allow_html=True)
@@ -135,9 +138,9 @@ def render_dashboard_page(user_id: str, access_token: str = None):
         with col_chart_right:
             st.markdown(
                 """
-                <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; margin-bottom: 1rem;">
-                    <div style="font-weight: 700; font-size: 0.95rem; color: #F8FAFC; margin-bottom: 4px;">🔄 Review Pipeline Status</div>
-                    <div style="font-size: 0.75rem; color: #64748B; margin-bottom: 12px;">Human review triage breakdown</div>
+                <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                    <div style="font-weight: 700; font-size: 0.95rem; color: #111827; margin-bottom: 2px;">🔄 Review Pipeline Status</div>
+                    <div style="font-size: 0.75rem; color: #6B7280; margin-bottom: 12px;">Human review triage breakdown</div>
                 """,
                 unsafe_allow_html=True,
             )
@@ -148,20 +151,20 @@ def render_dashboard_page(user_id: str, access_token: str = None):
                 status_counts,
                 names="Status",
                 values="Count",
-                hole=0.62,
+                hole=0.60,
                 color="Status",
                 color_discrete_map={
                     "Approved": "#10B981",
                     "Pending Review": "#F59E0B",
-                    "Needs Clarification": "#6366F1",
-                    "Rejected": "#F43F5E",
+                    "Needs Clarification": "#4F46E5",
+                    "Rejected": "#EF4444",
                 },
             )
             fig_status.update_traces(
                 textinfo="percent+value",
-                marker=dict(line=dict(color="#111827", width=2)),
+                marker=dict(line=dict(color="#FFFFFF", width=2)),
             )
-            apply_dark_layout(fig_status)
+            apply_stitch_light_layout(fig_status)
             fig_status.update_layout(showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
             st.plotly_chart(fig_status, use_container_width=True)
             st.markdown("</div>", unsafe_allow_html=True)
@@ -171,9 +174,9 @@ def render_dashboard_page(user_id: str, access_token: str = None):
         with col_pri:
             st.markdown(
                 """
-                <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; margin-bottom: 1rem;">
-                    <div style="font-weight: 700; font-size: 0.95rem; color: #F8FAFC; margin-bottom: 4px;">⚡ Tasks by Urgency & Priority</div>
-                    <div style="font-size: 0.75rem; color: #64748B; margin-bottom: 12px;">Explicit priority levels identified by AI</div>
+                <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                    <div style="font-weight: 700; font-size: 0.95rem; color: #111827; margin-bottom: 2px;">⚡ Tasks by Priority</div>
+                    <div style="font-size: 0.75rem; color: #6B7280; margin-bottom: 12px;">Identified urgency levels</div>
                 """,
                 unsafe_allow_html=True,
             )
@@ -191,19 +194,16 @@ def render_dashboard_page(user_id: str, access_token: str = None):
                     text="Count",
                     color="Priority",
                     color_discrete_map={
-                        "Highest": "#EF4444",
-                        "High": "#F97316",
-                        "Medium": "#FBBF24",
-                        "Low": "#38BDF8",
+                        "Highest": "#DC2626",
+                        "High": "#EA580C",
+                        "Medium": "#CA8A04",
+                        "Low": "#0284C7",
                         "Lowest": "#64748B",
-                        "Not Specified": "#475569",
+                        "Not Specified": "#94A3B8",
                     },
                 )
-                fig_pri.update_traces(
-                    textposition="outside",
-                    width=0.45,
-                )
-                apply_dark_layout(fig_pri, height=250)
+                fig_pri.update_traces(textposition="outside", width=0.45)
+                apply_stitch_light_layout(fig_pri, height=250)
                 fig_pri.update_layout(showlegend=False, xaxis_title="", yaxis_title="", yaxis=dict(autorange="reversed"))
                 st.plotly_chart(fig_pri, use_container_width=True)
             st.markdown("</div>", unsafe_allow_html=True)
@@ -211,9 +211,9 @@ def render_dashboard_page(user_id: str, access_token: str = None):
         with col_time:
             st.markdown(
                 """
-                <div style="background: #111827; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; margin-bottom: 1rem;">
-                    <div style="font-weight: 700; font-size: 0.95rem; color: #F8FAFC; margin-bottom: 4px;">📈 Extraction Velocity</div>
-                    <div style="font-size: 0.75rem; color: #64748B; margin-bottom: 12px;">Action items captured over time</div>
+                <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; padding: 16px; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                    <div style="font-weight: 700; font-size: 0.95rem; color: #111827; margin-bottom: 2px;">📈 Extraction Velocity</div>
+                    <div style="font-size: 0.75rem; color: #6B7280; margin-bottom: 12px;">Action items captured over time</div>
                 """,
                 unsafe_allow_html=True,
             )
@@ -226,28 +226,26 @@ def render_dashboard_page(user_id: str, access_token: str = None):
                 x="date_created",
                 y="Tasks",
                 markers=True,
-                color_discrete_sequence=["#818CF8"],
+                color_discrete_sequence=["#4F46E5"],
             )
-            apply_dark_layout(fig_time, height=250)
+            apply_stitch_light_layout(fig_time, height=250)
             fig_time.update_layout(xaxis_title="", yaxis_title="")
             st.plotly_chart(fig_time, use_container_width=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
     else:
-        st.info("No action items available yet. Process your first meeting transcript above.")
+        st.info("No action items available yet. Process your first meeting transcript.")
 
-    st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 1.2rem;'></div>", unsafe_allow_html=True)
 
-    # 3. Recent Transcripts Table / Feed
+    # 5. Recent Transcripts List
     st.markdown(
         """
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-            <div>
-                <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #F8FAFC; letter-spacing: -0.02em;">
-                    🕒 Recent Meetings Archive
-                </h3>
-                <span style="font-size: 0.78rem; color: #94A3B8;">Direct access to latest parsed discussions</span>
-            </div>
+        <div style="margin-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #111827; letter-spacing: -0.02em;">
+                🕒 Recent Meeting Discussions
+            </h3>
+            <span style="font-size: 0.78rem; color: #6B7280;">Quick inspection and task drill-down</span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -258,11 +256,11 @@ def render_dashboard_page(user_id: str, access_token: str = None):
     if transcripts:
         for tr in transcripts[:5]:
             with st.container(border=True):
-                c_title, c_date, c_items, c_status, c_act = st.columns([3.5, 1.5, 1.5, 1.2, 1.3])
+                c_title, c_date, c_items, c_status, c_act = st.columns([3.6, 1.6, 1.6, 1.2, 1.2])
                 with c_title:
                     st.markdown(f"**{tr.get('meeting_name')}**")
                     st.markdown(
-                        f'<span style="background: rgba(255,255,255,0.06); color: #94A3B8; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-family: monospace;">'
+                        f'<span style="background: #F1F3F5; color: #4B5563; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-weight: 600;">'
                         f'{tr.get("source_type", "paste").upper()}</span>',
                         unsafe_allow_html=True,
                     )
@@ -274,14 +272,15 @@ def render_dashboard_page(user_id: str, access_token: str = None):
                     st.caption(f"✅ {tr.get('approved_count', 0)} approved")
                 with c_status:
                     stat = tr.get("processing_status", "processed").title()
-                    badge_bg = "rgba(16, 185, 129, 0.12)" if stat == "Processed" else "rgba(245, 158, 11, 0.12)"
-                    badge_col = "#34D399" if stat == "Processed" else "#FBBF24"
+                    badge_bg = "#ECFDF5" if stat == "Processed" else "#FFFBEB"
+                    badge_col = "#065F46" if stat == "Processed" else "#92400E"
+                    badge_border = "#A7F3D0" if stat == "Processed" else "#FDE68A"
                     st.markdown(
-                        f'<span style="background: {badge_bg}; color: {badge_col}; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">{stat}</span>',
+                        f'<span style="background: {badge_bg}; color: {badge_col}; border: 1px solid {badge_border}; padding: 3px 8px; border-radius: 6px; font-size: 0.73rem; font-weight: 600;">{stat}</span>',
                         unsafe_allow_html=True,
                     )
                 with c_act:
-                    if st.button("Inspect →", key=f"dash_view_{tr.get('id')}", use_container_width=True, type="secondary"):
+                    if st.button("View Items →", key=f"dash_view_{tr.get('id')}", use_container_width=True, type="secondary"):
                         st.session_state["filter_transcript_id"] = tr.get("id")
                         st.session_state["nav_selection"] = "Action Items"
                         st.rerun()

@@ -17,10 +17,10 @@ def render_transcript_history_page(user_id: str, access_token: Optional[str] = N
     st.markdown(
         """
         <div style="margin-bottom: 1.2rem;">
-            <h1 style="font-size: 2.1rem; font-weight: 800; color: #F8FAFC; margin: 0; letter-spacing: -0.03em;">
+            <h1 style="font-size: 2.1rem; font-weight: 800; color: #111827; margin: 0; letter-spacing: -0.03em;">
                 Transcript History
             </h1>
-            <p style="color: #94A3B8; font-size: 0.95rem; margin-top: 4px;">
+            <p style="color: #6B7280; font-size: 0.95rem; margin-top: 4px;">
                 Historical archive of all processed meeting discussions, extraction runs, and linked action items.
             </p>
         </div>
@@ -50,8 +50,8 @@ def render_transcript_history_page(user_id: str, access_token: Optional[str] = N
 
     st.markdown(
         f"""
-        <div style="font-size: 0.85rem; color: #94A3B8; margin-bottom: 12px;">
-            Found <b style="color: #F8FAFC;">{len(filtered_transcripts)}</b> meeting transcripts
+        <div style="font-size: 0.85rem; color: #6B7280; margin-bottom: 12px;">
+            Found <b style="color: #111827;">{len(filtered_transcripts)}</b> meeting transcripts
         </div>
         """,
         unsafe_allow_html=True,
@@ -65,8 +65,8 @@ def render_transcript_history_page(user_id: str, access_token: Optional[str] = N
     for tr in filtered_transcripts:
         tr_id = tr["id"]
         status_val = tr.get("processing_status", "processed").title()
-        badge_bg = "rgba(16, 185, 129, 0.12)" if status_val == "Processed" else "rgba(245, 158, 11, 0.12)"
-        badge_col = "#34D399" if status_val == "Processed" else "#FBBF24"
+        badge_bg = "#ECFDF5" if status_val == "Processed" else "#FEF3C7"
+        badge_col = "#059669" if status_val == "Processed" else "#D97706"
 
         with st.container(border=True):
             col_info, col_counts, col_status = st.columns([4, 2, 1.5])
@@ -74,15 +74,15 @@ def render_transcript_history_page(user_id: str, access_token: Optional[str] = N
             with col_info:
                 st.markdown(
                     f"""
-                    <div style="font-size: 1.15rem; font-weight: 700; color: #F8FAFC; margin-bottom: 4px;">
+                    <div style="font-size: 1.15rem; font-weight: 700; color: #111827; margin-bottom: 4px;">
                         {tr.get('meeting_name')}
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: #94A3B8;">
-                        <span style="background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-family: monospace;">
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: #6B7280;">
+                        <span style="background: #F3F4F6; color: #4B5563; border: 1px solid #E5E7EB; padding: 2px 6px; border-radius: 4px; font-family: monospace;">
                             {tr.get('source_type', 'paste').upper()}
                         </span>
                         <span>•</span>
-                        <span>📅 Held: <b>{tr.get('meeting_date')}</b></span>
+                        <span>📅 Held: <b style="color: #374151;">{tr.get('meeting_date')}</b></span>
                         <span>•</span>
                         <span>Uploaded: {format_iso_date(tr.get('created_at'))}</span>
                     </div>
@@ -95,12 +95,12 @@ def render_transcript_history_page(user_id: str, access_token: Optional[str] = N
                     f"""
                     <div style="display: flex; gap: 14px; align-items: center; height: 100%;">
                         <div>
-                            <div style="font-size: 1.3rem; font-weight: 800; color: #818CF8;">{tr.get('action_item_count', 0)}</div>
-                            <div style="font-size: 0.7rem; color: #94A3B8; text-transform: uppercase;">Extracted</div>
+                            <div style="font-size: 1.3rem; font-weight: 800; color: #4F46E5;">{tr.get('action_item_count', 0)}</div>
+                            <div style="font-size: 0.7rem; color: #6B7280; text-transform: uppercase;">Extracted</div>
                         </div>
                         <div>
-                            <div style="font-size: 1.3rem; font-weight: 800; color: #34D399;">{tr.get('approved_count', 0)}</div>
-                            <div style="font-size: 0.7rem; color: #94A3B8; text-transform: uppercase;">Approved</div>
+                            <div style="font-size: 1.3rem; font-weight: 800; color: #059669;">{tr.get('approved_count', 0)}</div>
+                            <div style="font-size: 0.7rem; color: #6B7280; text-transform: uppercase;">Approved</div>
                         </div>
                     </div>
                     """,
@@ -111,7 +111,7 @@ def render_transcript_history_page(user_id: str, access_token: Optional[str] = N
                 st.markdown(
                     f"""
                     <div style="display: flex; justify-content: flex-end; align-items: center; height: 100%;">
-                        <span style="background: {badge_bg}; color: {badge_col}; border: 1px solid {badge_col}33; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
+                        <span style="background: {badge_bg}; color: {badge_col}; border: 1px solid {badge_col}40; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">
                             {status_val}
                         </span>
                     </div>
@@ -147,7 +147,7 @@ def render_transcript_history_page(user_id: str, access_token: Optional[str] = N
                                 )
                             if i.get("source_excerpt"):
                                 st.markdown(f"> *\"{i.get('source_excerpt')}\"*")
-                            st.markdown("<hr style='margin: 6px 0; border: none; border-top: 1px solid rgba(255,255,255,0.06);'/>", unsafe_allow_html=True)
+                            st.markdown("<hr style='margin: 6px 0; border: none; border-top: 1px solid #E5E7EB;'/>", unsafe_allow_html=True)
                     else:
                         st.write("No action items currently linked to this transcript.")
 

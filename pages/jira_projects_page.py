@@ -16,10 +16,10 @@ def render_jira_projects_page(user_id: str, access_token: Optional[str] = None):
         st.markdown(
             """
             <div style="margin-bottom: 1.2rem;">
-                <h1 style="font-size: 2.1rem; font-weight: 800; color: #F8FAFC; margin: 0; letter-spacing: -0.03em;">
+                <h1 style="font-size: 2.1rem; font-weight: 800; color: #111827; margin: 0; letter-spacing: -0.03em;">
                     Jira Projects
                 </h1>
-                <p style="color: #94A3B8; font-size: 0.95rem; margin-top: 4px;">
+                <p style="color: #6B7280; font-size: 0.95rem; margin-top: 4px;">
                     Configure target Jira projects that provide semantic context for AI action item classification.
                 </p>
             </div>
@@ -38,9 +38,9 @@ def render_jira_projects_page(user_id: str, access_token: Optional[str] = None):
         active_count = len([p for p in projects if p.get("is_active", True)])
         st.markdown(
             f"""
-            <div style="background: #111827; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 9px 12px; margin-top: 1.6rem; text-align: center;">
-                <span style="font-size: 0.8rem; color: #94A3B8;">Active Context:</span>
-                <span style="font-weight: 700; color: #10B981; font-size: 0.9rem;">{active_count} of {len(projects)}</span>
+            <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 8px; padding: 9px 12px; margin-top: 1.6rem; text-align: center; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+                <span style="font-size: 0.8rem; color: #6B7280;">Active Context:</span>
+                <span style="font-weight: 700; color: #059669; font-size: 0.9rem;">{active_count} of {len(projects)}</span>
             </div>
             """,
             unsafe_allow_html=True,
@@ -112,7 +112,7 @@ def render_jira_projects_page(user_id: str, access_token: Optional[str] = None):
                         except ValueError as ve:
                             st.error(str(ve))
 
-    st.markdown("<hr style='margin: 1rem 0; border: none; border-top: 1px solid rgba(255,255,255,0.08);'/>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 1rem 0; border: none; border-top: 1px solid #E5E7EB;'/>", unsafe_allow_html=True)
 
     if not filtered_projects:
         st.info("No Jira projects match your search query. Use 'Register New Jira Project' above to add one.")
@@ -132,17 +132,17 @@ def render_jira_projects_page(user_id: str, access_token: Optional[str] = None):
                     f"""
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                         <span style="font-size: 0.8rem;">{active_dot}</span>
-                        <span style="background: rgba(99, 102, 241, 0.15); color: #A5B4FC; border: 1px solid rgba(99, 102, 241, 0.3); font-size: 0.8rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">
+                        <span style="background: #EEF2FF; color: #4F46E5; border: 1px solid #C7D2FE; font-size: 0.8rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">
                             {p.get('project_key')}
                         </span>
-                        <span style="font-size: 1.1rem; font-weight: 700; color: #F8FAFC;">
+                        <span style="font-size: 1.1rem; font-weight: 700; color: #111827;">
                             {p.get('project_name')}
                         </span>
-                        <span style="background: rgba(255,255,255,0.06); color: #94A3B8; font-size: 0.72rem; padding: 2px 7px; border-radius: 4px;">
+                        <span style="background: #F3F4F6; color: #4B5563; border: 1px solid #E5E7EB; font-size: 0.72rem; padding: 2px 7px; border-radius: 4px;">
                             {p.get('team_name') or 'General Team'}
                         </span>
                     </div>
-                    <div style="font-size: 0.85rem; color: #94A3B8; margin-bottom: 8px; line-height: 1.4;">
+                    <div style="font-size: 0.85rem; color: #4B5563; margin-bottom: 8px; line-height: 1.4;">
                         {p.get('description') or 'No description provided.'}
                     </div>
                     """,
@@ -153,7 +153,7 @@ def render_jira_projects_page(user_id: str, access_token: Optional[str] = None):
                 kws = p.get("keywords") or []
                 if kws:
                     kw_badges = " ".join([
-                        f'<span style="background: rgba(255, 255, 255, 0.05); color: #CBD5E1; border: 1px solid rgba(255, 255, 255, 0.08); padding: 1px 6px; border-radius: 4px; font-size: 0.72rem;">#{k}</span>'
+                        f'<span style="background: #F8F9FA; color: #4B5563; border: 1px solid #E5E7EB; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem;">#{k}</span>'
                         for k in kws
                     ])
                     st.markdown(kw_badges, unsafe_allow_html=True)

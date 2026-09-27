@@ -1,6 +1,6 @@
 """
 Action Items Management page.
-Modern Dark Enterprise SaaS issue board with filters, inline editing, and CSV/Excel export.
+Stitch Design System: Executive Precision (Warm Minimalist Light Mode, Workstation Cards).
 """
 
 from typing import Optional, Dict, Any
@@ -13,15 +13,15 @@ from utils.helpers import get_status_badge, get_priority_badge, get_type_badge, 
 
 def render_action_items_page(user_id: str, access_token: Optional[str] = None):
     # Header
-    col_hdr, col_btns = st.columns([3.5, 2.5])
+    col_hdr, col_btns = st.columns([3.8, 2.2])
     with col_hdr:
         st.markdown(
             """
-            <div style="margin-bottom: 1rem;">
-                <h1 style="font-size: 2.1rem; font-weight: 800; color: #F8FAFC; margin: 0; letter-spacing: -0.03em;">
-                    Action Items
+            <div style="margin-bottom: 0.8rem;">
+                <h1 style="font-size: 1.85rem; font-weight: 800; color: #111827; margin: 0; letter-spacing: -0.025em;">
+                    Action Items Queue
                 </h1>
-                <p style="color: #94A3B8; font-size: 0.95rem; margin-top: 4px;">
+                <p style="color: #6B7280; font-size: 0.9rem; margin-top: 3px;">
                     Review, modify, approve, and export meeting tasks categorized for Jira.
                 </p>
             </div>
@@ -36,12 +36,12 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
     projects = project_repo.get_projects(user_id)
     transcripts = transcript_repo.get_transcripts(user_id)
 
-    # Search & Filter Drawer
-    with st.expander("⚡ Filter & Search Tasks", expanded=True):
+    # Search & Filter Container (Level 1 Card)
+    with st.expander("🔍 Filter & Search Tasks", expanded=True):
         col_search, col_proj, col_status = st.columns([3, 2, 2])
 
         with col_search:
-            search_query = st.text_input("🔍 Search Action Items", placeholder="Filter by title, assignee, excerpt, or notes...")
+            search_query = st.text_input("Search Text", placeholder="Filter by title, assignee, excerpt, or notes...")
 
         with col_proj:
             proj_options = ["All Projects"] + [f"{p['project_key']} - {p['project_name']}" for p in projects]
@@ -55,7 +55,7 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
 
         with col_status:
             status_options = ["All Statuses", "Pending Review", "Approved", "Needs Clarification", "Rejected"]
-            selected_status = st.selectbox("Status", status_options)
+            selected_status = st.selectbox("Review Status", status_options)
             if selected_status == "All Statuses":
                 selected_status = None
 
@@ -74,7 +74,7 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
                 selected_type = None
 
         with col_assignee:
-            assignee_filter = st.text_input("Assignee", placeholder="Filter by person...")
+            assignee_filter = st.text_input("Assignee Filter", placeholder="Filter by person...")
 
         with col_meeting:
             meeting_options = ["All Meetings"] + [t["meeting_name"] for t in transcripts]
@@ -109,11 +109,11 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
         st.markdown(
             f"""
             <div style="display: flex; align-items: center; gap: 8px; margin: 8px 0;">
-                <span style="font-size: 0.95rem; font-weight: 700; color: #F8FAFC;">
-                    Showing <span style="color: #818CF8;">{len(items)}</span> items
+                <span style="font-size: 0.95rem; font-weight: 700; color: #111827;">
+                    Showing <span style="color: #4F46E5;">{len(items)}</span> items
                 </span>
-                <span style="color: #64748B;">•</span>
-                <span style="font-size: 0.8rem; color: #94A3B8;">Human-in-the-loop review</span>
+                <span style="color: #D1D5DB;">•</span>
+                <span style="font-size: 0.8rem; color: #6B7280;">Human-in-the-loop review</span>
             </div>
             """,
             unsafe_allow_html=True,
@@ -139,18 +139,18 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
             disabled=(len(items) == 0),
         )
 
-    st.markdown("<hr style='margin: 0.6rem 0 1.2rem 0; border: none; border-top: 1px solid rgba(255,255,255,0.08);'/>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 0.6rem 0 1.2rem 0; border: none; border-top: 1px solid #E5E7EB;'/>", unsafe_allow_html=True)
 
     if not items:
         st.info("No action items match the selected criteria. Adjust your filters or process a new transcript.")
         return
 
-    # Render Task Cards
-    priority_border_colors = {
-        "Highest": "#EF4444",
-        "High": "#F97316",
-        "Medium": "#EAB308",
-        "Low": "#38BDF8",
+    # Render Workstation Issue Cards
+    priority_colors = {
+        "Highest": "#DC2626",
+        "High": "#EA580C",
+        "Medium": "#CA8A04",
+        "Low": "#0284C7",
         "Lowest": "#64748B",
     }
 
@@ -158,46 +158,43 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
         item_id = item["id"]
         status = item.get("status", "Pending Review")
         pri = item.get("priority")
-        border_accent = priority_border_colors.get(pri, "#6366F1")
+        border_accent = priority_colors.get(pri, "#4F46E5")
 
         with st.container(border=True):
-            # Header line: Title, project key, priority, confidence, status
             c_main, c_meta = st.columns([4.2, 2.8])
 
             with c_main:
-                # Title and assignee
                 assignee_display = item.get("assignee") or "Unassigned"
                 due_display = item.get("due_date") or "No deadline"
                 st.markdown(
                     f"""
-                    <div style="margin-bottom: 6px;">
-                        <span style="font-size: 1.15rem; font-weight: 700; color: #F8FAFC; line-height: 1.25;">
+                    <div style="margin-bottom: 5px;">
+                        <span style="font-size: 1.1rem; font-weight: 700; color: #111827; line-height: 1.3;">
                             {item.get('action_title')}
                         </span>
                     </div>
-                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 0.78rem; color: #94A3B8;">
-                        <span style="background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 5px; color: #CBD5E1;">
+                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 0.78rem; color: #6B7280;">
+                        <span style="background: #F3F4F6; color: #374151; padding: 2px 7px; border-radius: 5px; font-weight: 500;">
                             👤 {assignee_display}
                         </span>
                         <span>•</span>
-                        <span style="background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 5px; color: #CBD5E1;">
+                        <span style="background: #F3F4F6; color: #374151; padding: 2px 7px; border-radius: 5px; font-weight: 500;">
                             📅 {due_display}
                         </span>
-                        {f'<span>•</span><span style="color: #64748B;">From: {item.get("meeting_name")}</span>' if item.get("meeting_name") else ''}
+                        {f'<span>•</span><span style="color: #9CA3AF;">Meeting: {item.get("meeting_name")}</span>' if item.get("meeting_name") else ''}
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
 
             with c_meta:
-                # Project & Badges
                 proj_key = item.get("jira_project_key") or "UNMAPPED"
-                proj_name = item.get("project_name") or "No project linked"
+                proj_name = item.get("project_name") or "No project"
                 st.markdown(
                     f"""
                     <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
                         <div style="display: flex; align-items: center; gap: 6px;">
-                            <span style="background: rgba(99, 102, 241, 0.15); color: #A5B4FC; border: 1px solid rgba(99, 102, 241, 0.3); font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">
+                            <span style="background: #EEF2FF; color: #4338CA; border: 1px solid #C7D2FE; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">
                                 🏷️ {proj_key}
                             </span>
                             {get_status_badge(status)}
@@ -216,7 +213,7 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
             if item.get("description"):
                 st.markdown(
                     f"""
-                    <div style="font-size: 0.88rem; color: #CBD5E1; line-height: 1.5; margin: 4px 0 10px 0;">
+                    <div style="font-size: 0.88rem; color: #374151; line-height: 1.5; margin: 4px 0 10px 0;">
                         {item.get('description')}
                     </div>
                     """,
@@ -227,11 +224,11 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
             if item.get("source_excerpt"):
                 st.markdown(
                     f"""
-                    <div style="background: #0B0F17; border-left: 3px solid #6366F1; border-radius: 0 8px 8px 0; padding: 8px 12px; margin: 6px 0 12px 0;">
-                        <div style="font-size: 0.7rem; font-weight: 700; color: #818CF8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">
+                    <div style="background: #F8F9FB; border-left: 3px solid #4F46E5; border-radius: 0 8px 8px 0; padding: 8px 12px; margin: 6px 0 12px 0;">
+                        <div style="font-size: 0.7rem; font-weight: 700; color: #4F46E5; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">
                             Verbatim Discussion Excerpt
                         </div>
-                        <div style="font-size: 0.82rem; color: #94A3B8; font-style: italic;">
+                        <div style="font-size: 0.82rem; color: #4B5563; font-style: italic;">
                             "{item.get('source_excerpt')}"
                         </div>
                     </div>
@@ -242,14 +239,14 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
             if item.get("clarification_required"):
                 st.markdown(
                     f"""
-                    <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 6px 10px; margin-bottom: 10px; font-size: 0.8rem; color: #FBBF24;">
+                    <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 6px 10px; margin-bottom: 10px; font-size: 0.8rem; color: #92400E;">
                         ⚠️ <b>Clarification Flag:</b> {item.get('clarification_reason') or 'Task requirements or target project mapping are uncertain.'}
                     </div>
                     """,
                     unsafe_allow_html=True,
                 )
 
-            # Workflow Action Buttons & Edit Toggle
+            # Actions Row
             col_actions, col_edit_btn = st.columns([3.5, 1.2])
 
             with col_actions:
@@ -280,7 +277,7 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
                 with st.form(key=f"edit_form_{item_id}"):
                     st.markdown("##### ✏️ Edit Action Item")
                     e_title = st.text_input("Title", value=item.get("action_title", ""))
-                    e_desc = st.text_area("Description", value=item.get("description", ""), height=90)
+                    e_desc = st.text_area("Description", value=item.get("description", ""), height=80)
 
                     e_c1, e_c2 = st.columns(2)
                     with e_c1:
