@@ -1,7 +1,9 @@
 -- =====================================================================
--- Migration: 001_initial_schema.sql
--- Project: Minute AI (Meeting Transcript to Jira Action Item Dashboard)
--- Target: Supabase PostgreSQL (qklcxzdumitujatjoxqn)
+-- Minute AI - Complete Supabase Cloud Database Migration & Seed
+-- Project Ref: qklcxzdumitujatjoxqn
+-- Instructions:
+-- 1. Open Supabase Dashboard: https://supabase.com/dashboard/project/qklcxzdumitujatjoxqn/sql/new
+-- 2. Paste this entire SQL file and click "Run" (or Ctrl+Enter)
 -- =====================================================================
 
 -- 1. Helper function for automated updated_at timestamps

@@ -13,13 +13,19 @@ load_dotenv()
 
 def get_supabase_client(access_token: Optional[str] = None):
     """
-    Returns an authenticated Supabase client using anon key and optional user access token.
+    Returns an authenticated Supabase client using anon key, service role key, or user access token.
     Enforces Row Level Security (RLS) on PostgreSQL.
     """
     url = os.getenv("SUPABASE_URL", "")
     anon_key = os.getenv("SUPABASE_ANON_KEY", "")
+    service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
-    if not url or not anon_key or "your-project" in url or "your_supabase" in anon_key:
+    if not url or "your-project" in url:
+        return None
+
+    # Use service role key if available and no user access_token specified (admin/backend operations)
+    api_key = service_key if (service_key and not access_token and "your_supabase" not in service_key) else anon_key
+    if not api_key or "your_supabase" in api_key:
         return None
 
     try:
@@ -29,7 +35,7 @@ def get_supabase_client(access_token: Optional[str] = None):
         if access_token:
             options.headers = {"Authorization": f"Bearer {access_token}"}
 
-        return create_client(url, anon_key, options=options)
+        return create_client(url, api_key, options=options)
     except Exception:
         return None
 
