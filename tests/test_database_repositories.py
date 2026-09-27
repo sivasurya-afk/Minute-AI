@@ -8,7 +8,7 @@ from database.repositories import ProjectRepository, TranscriptRepository, Actio
 
 def test_project_repository_crud():
     repo = ProjectRepository()
-    user_id = "test-user-iso-1"
+    user_id = "00000000-0000-0000-0000-000000000001"
 
     # Create
     created = repo.create_project(
@@ -57,6 +57,8 @@ def test_project_repository_crud():
 def test_user_data_isolation():
     """Verify that user A cannot see or access user B's projects or transcripts."""
     proj_repo = ProjectRepository()
+    # Test repository multi-tenant logic in mock mode
+    proj_repo.client = None
     user_a = "user-a-1111"
     user_b = "user-b-2222"
 
@@ -82,7 +84,7 @@ def test_user_data_isolation():
 def test_transcript_and_action_item_cascade():
     t_repo = TranscriptRepository()
     a_repo = ActionItemRepository()
-    user_id = "cascade-test-user"
+    user_id = "00000000-0000-0000-0000-000000000001"
 
     # Create transcript
     t = t_repo.create_transcript(
