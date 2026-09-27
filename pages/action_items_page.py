@@ -1,6 +1,6 @@
 """
 Action Items Management page.
-Provides interactive filtering, searching, editing, review status transitions, and CSV/Excel export.
+Modern Dark Enterprise SaaS issue board with filters, inline editing, and CSV/Excel export.
 """
 
 from typing import Optional, Dict, Any
@@ -8,21 +8,26 @@ import streamlit as st
 import pandas as pd
 from database.repositories import ActionItemRepository, ProjectRepository, TranscriptRepository
 from services.export_service import ExportService
-from utils.helpers import get_status_badge, get_priority_badge, get_type_badge, format_iso_date
+from utils.helpers import get_status_badge, get_priority_badge, get_type_badge, get_confidence_badge, format_iso_date
 
 
 def render_action_items_page(user_id: str, access_token: Optional[str] = None):
-    st.markdown(
-        """
-        <div style="margin-bottom: 1.5rem;">
-            <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 0.2rem; color: #1E293B;">Action Items</h1>
-            <p style="color: #64748B; font-size: 0.95rem; margin: 0;">
-                Review, modify, filter, and approve extracted tasks before they become Jira tickets.
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    # Header
+    col_hdr, col_btns = st.columns([3.5, 2.5])
+    with col_hdr:
+        st.markdown(
+            """
+            <div style="margin-bottom: 1rem;">
+                <h1 style="font-size: 2.1rem; font-weight: 800; color: #F8FAFC; margin: 0; letter-spacing: -0.03em;">
+                    Action Items
+                </h1>
+                <p style="color: #94A3B8; font-size: 0.95rem; margin-top: 4px;">
+                    Review, modify, approve, and export meeting tasks categorized for Jira.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     action_repo = ActionItemRepository(access_token)
     project_repo = ProjectRepository(access_token)
@@ -31,12 +36,12 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
     projects = project_repo.get_projects(user_id)
     transcripts = transcript_repo.get_transcripts(user_id)
 
-    # 1. Search & Filter Bar
-    with st.expander("🔍 Search & Filter Action Items", expanded=True):
+    # Search & Filter Drawer
+    with st.expander("⚡ Filter & Search Tasks", expanded=True):
         col_search, col_proj, col_status = st.columns([3, 2, 2])
 
         with col_search:
-            search_query = st.text_input("Search Title, Description, Excerpt", placeholder="Type keywords...")
+            search_query = st.text_input("🔍 Search Action Items", placeholder="Filter by title, assignee, excerpt, or notes...")
 
         with col_proj:
             proj_options = ["All Projects"] + [f"{p['project_key']} - {p['project_name']}" for p in projects]
@@ -50,7 +55,7 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
 
         with col_status:
             status_options = ["All Statuses", "Pending Review", "Approved", "Needs Clarification", "Rejected"]
-            selected_status = st.selectbox("Review Status", status_options)
+            selected_status = st.selectbox("Status", status_options)
             if selected_status == "All Statuses":
                 selected_status = None
 
@@ -64,17 +69,17 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
 
         with col_type:
             type_options = ["All Types", "bug", "feature", "investigation", "follow-up", "task"]
-            selected_type = st.selectbox("Action Type", type_options)
+            selected_type = st.selectbox("Type", type_options)
             if selected_type == "All Types":
                 selected_type = None
 
         with col_assignee:
-            assignee_filter = st.text_input("Assignee Filter", placeholder="e.g. Bob")
+            assignee_filter = st.text_input("Assignee", placeholder="Filter by person...")
 
         with col_meeting:
             meeting_options = ["All Meetings"] + [t["meeting_name"] for t in transcripts]
             preselected_meeting_id = st.session_state.pop("filter_transcript_id", None)
-            selected_meeting = st.selectbox("Meeting", meeting_options)
+            selected_meeting = st.selectbox("Origin Meeting", meeting_options)
             selected_transcript_id = preselected_meeting_id
             if selected_meeting != "All Meetings":
                 matching_t = next((t for t in transcripts if t["meeting_name"] == selected_meeting), None)
@@ -98,27 +103,35 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
 
     items = action_repo.get_action_items(user_id, filters=filters, search=search_query)
 
-    # 2. Results Header & Export Buttons
-    col_count, col_exp_csv, col_exp_xls = st.columns([5, 1.2, 1.2])
-
+    # Action Toolbar
+    col_count, col_exp_csv, col_exp_xls = st.columns([4, 1.2, 1.2])
     with col_count:
-        st.markdown(f"Showing **{len(items)}** action items matching current filters")
-
+        st.markdown(
+            f"""
+            <div style="display: flex; align-items: center; gap: 8px; margin: 8px 0;">
+                <span style="font-size: 0.95rem; font-weight: 700; color: #F8FAFC;">
+                    Showing <span style="color: #818CF8;">{len(items)}</span> items
+                </span>
+                <span style="color: #64748B;">•</span>
+                <span style="font-size: 0.8rem; color: #94A3B8;">Human-in-the-loop review</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
     with col_exp_csv:
         csv_bytes = ExportService.to_csv(items)
         st.download_button(
-            label="📥 CSV",
+            label="📥 Export CSV",
             data=csv_bytes,
             file_name="minute_ai_action_items.csv",
             mime="text/csv",
             use_container_width=True,
             disabled=(len(items) == 0),
         )
-
     with col_exp_xls:
         excel_bytes = ExportService.to_excel(items)
         st.download_button(
-            label="📊 Excel",
+            label="📊 Export Excel",
             data=excel_bytes,
             file_name="minute_ai_action_items.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -126,73 +139,136 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
             disabled=(len(items) == 0),
         )
 
-    st.markdown("<hr style='margin: 0.8rem 0 1.2rem 0; border: none; border-top: 1px solid #E2E8F0;'/>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 0.6rem 0 1.2rem 0; border: none; border-top: 1px solid rgba(255,255,255,0.08);'/>", unsafe_allow_html=True)
 
     if not items:
-        st.info("No action items found matching your criteria. Try adjusting your filters or search query.")
+        st.info("No action items match the selected criteria. Adjust your filters or process a new transcript.")
         return
 
-    # 3. Action Items List View
+    # Render Task Cards
+    priority_border_colors = {
+        "Highest": "#EF4444",
+        "High": "#F97316",
+        "Medium": "#EAB308",
+        "Low": "#38BDF8",
+        "Lowest": "#64748B",
+    }
+
     for item in items:
         item_id = item["id"]
         status = item.get("status", "Pending Review")
+        pri = item.get("priority")
+        border_accent = priority_border_colors.get(pri, "#6366F1")
 
         with st.container(border=True):
-            # Top line: Title, project, priority, status badges
-            c1, c2, c3, c4 = st.columns([4, 2, 1.5, 2.5])
+            # Header line: Title, project key, priority, confidence, status
+            c_main, c_meta = st.columns([4.2, 2.8])
 
-            with c1:
-                st.markdown(f"#### {item.get('action_title')}")
-                st.caption(f"📅 Due: **{item.get('due_date') or 'None'}** &nbsp;•&nbsp; 👤 Assignee: **{item.get('assignee') or 'Unassigned'}**")
+            with c_main:
+                # Title and assignee
+                assignee_display = item.get("assignee") or "Unassigned"
+                due_display = item.get("due_date") or "No deadline"
+                st.markdown(
+                    f"""
+                    <div style="margin-bottom: 6px;">
+                        <span style="font-size: 1.15rem; font-weight: 700; color: #F8FAFC; line-height: 1.25;">
+                            {item.get('action_title')}
+                        </span>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 0.78rem; color: #94A3B8;">
+                        <span style="background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 5px; color: #CBD5E1;">
+                            👤 {assignee_display}
+                        </span>
+                        <span>•</span>
+                        <span style="background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 5px; color: #CBD5E1;">
+                            📅 {due_display}
+                        </span>
+                        {f'<span>•</span><span style="color: #64748B;">From: {item.get("meeting_name")}</span>' if item.get("meeting_name") else ''}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
-            with c2:
-                proj_name = item.get("project_name") or "Unmapped Project"
-                proj_key = item.get("jira_project_key") or "—"
-                st.markdown(f"🏷️ **{proj_key}**")
-                st.caption(proj_name)
+            with c_meta:
+                # Project & Badges
+                proj_key = item.get("jira_project_key") or "UNMAPPED"
+                proj_name = item.get("project_name") or "No project linked"
+                st.markdown(
+                    f"""
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="background: rgba(99, 102, 241, 0.15); color: #A5B4FC; border: 1px solid rgba(99, 102, 241, 0.3); font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">
+                                🏷️ {proj_key}
+                            </span>
+                            {get_status_badge(status)}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            {get_priority_badge(pri)}
+                            {get_type_badge(item.get("action_type", "task"))}
+                            {get_confidence_badge(float(item.get("confidence_score", 0.85)))}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
-            with c3:
-                st.markdown(get_priority_badge(item.get("priority")), unsafe_allow_html=True)
-                st.markdown("<div style='margin-top: 4px;'>", unsafe_allow_html=True)
-                st.markdown(get_type_badge(item.get("action_type", "task")), unsafe_allow_html=True)
-                st.markdown("</div>", unsafe_allow_html=True)
+            # Description
+            if item.get("description"):
+                st.markdown(
+                    f"""
+                    <div style="font-size: 0.88rem; color: #CBD5E1; line-height: 1.5; margin: 4px 0 10px 0;">
+                        {item.get('description')}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
-            with c4:
-                st.markdown(get_status_badge(status), unsafe_allow_html=True)
-                conf = int(float(item.get("confidence_score", 0.85)) * 100)
-                st.caption(f"AI Confidence: {conf}%")
+            # Verbatim source quote callout
+            if item.get("source_excerpt"):
+                st.markdown(
+                    f"""
+                    <div style="background: #0B0F17; border-left: 3px solid #6366F1; border-radius: 0 8px 8px 0; padding: 8px 12px; margin: 6px 0 12px 0;">
+                        <div style="font-size: 0.7rem; font-weight: 700; color: #818CF8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">
+                            Verbatim Discussion Excerpt
+                        </div>
+                        <div style="font-size: 0.82rem; color: #94A3B8; font-style: italic;">
+                            "{item.get('source_excerpt')}"
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
-            # Description and Source Excerpt
-            st.write(item.get("description", ""))
+            if item.get("clarification_required"):
+                st.markdown(
+                    f"""
+                    <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 6px 10px; margin-bottom: 10px; font-size: 0.8rem; color: #FBBF24;">
+                        ⚠️ <b>Clarification Flag:</b> {item.get('clarification_reason') or 'Task requirements or target project mapping are uncertain.'}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
-            with st.expander("💬 View Source Transcript Excerpt & AI Reason", expanded=False):
-                st.markdown(f"> *\"{item.get('source_excerpt', '')}\"*")
-                if item.get("clarification_required"):
-                    st.warning(f"⚠️ **Clarification Reason:** {item.get('clarification_reason')}")
-                if item.get("meeting_name"):
-                    st.caption(f"From Meeting: **{item.get('meeting_name')}** ({format_iso_date(item.get('meeting_date'))})")
-
-            # Actions Row: Quick status buttons + Edit expander
-            col_actions, col_edit_btn = st.columns([3, 1])
+            # Workflow Action Buttons & Edit Toggle
+            col_actions, col_edit_btn = st.columns([3.5, 1.2])
 
             with col_actions:
                 b_app, b_clar, b_rej = st.columns(3)
                 with b_app:
                     if status != "Approved":
-                        if st.button("✅ Approve", key=f"app_{item_id}", use_container_width=True):
+                        if st.button("✅ Approve", key=f"app_{item_id}", use_container_width=True, type="primary"):
                             action_repo.update_action_item_status(user_id, item_id, "Approved")
-                            st.success("Item marked as Approved!")
                             st.rerun()
 
                 with b_clar:
                     if status != "Needs Clarification":
-                        if st.button("❓ Clarify", key=f"clar_{item_id}", use_container_width=True):
+                        if st.button("❓ Clarify", key=f"clar_{item_id}", use_container_width=True, type="secondary"):
                             action_repo.update_action_item_status(user_id, item_id, "Needs Clarification")
                             st.rerun()
 
                 with b_rej:
                     if status != "Rejected":
-                        if st.button("❌ Reject", key=f"rej_{item_id}", use_container_width=True):
+                        if st.button("❌ Reject", key=f"rej_{item_id}", use_container_width=True, type="secondary"):
                             action_repo.update_action_item_status(user_id, item_id, "Rejected")
                             st.rerun()
 
@@ -202,9 +278,9 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
             # Editable fields section
             if show_edit:
                 with st.form(key=f"edit_form_{item_id}"):
-                    st.markdown("##### ✏️ Edit Action Item Details")
+                    st.markdown("##### ✏️ Edit Action Item")
                     e_title = st.text_input("Title", value=item.get("action_title", ""))
-                    e_desc = st.text_area("Description", value=item.get("description", ""), height=100)
+                    e_desc = st.text_area("Description", value=item.get("description", ""), height=90)
 
                     e_c1, e_c2 = st.columns(2)
                     with e_c1:
@@ -218,7 +294,6 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
                             index=pri_idx,
                         )
 
-                        # Project options
                         proj_keys = [p["project_key"] for p in projects]
                         current_proj_key = item.get("jira_project_key")
                         current_proj_idx = proj_keys.index(current_proj_key) if current_proj_key in proj_keys else 0
@@ -229,7 +304,6 @@ def render_action_items_page(user_id: str, access_token: Optional[str] = None):
 
                     save_submitted = st.form_submit_button("Save Changes", type="primary")
                     if save_submitted:
-                        # Find corresponding project_id
                         selected_proj = next((p for p in projects if p["project_key"] == e_proj_key), None)
                         updated_fields = {
                             "action_title": e_title.strip(),

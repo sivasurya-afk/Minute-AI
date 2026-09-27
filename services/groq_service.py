@@ -13,14 +13,16 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # Default model constants
-DEFAULT_LLM_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_LLM_MODEL = "qwen/qwen3.8-27b"
 DEFAULT_TRANSCRIPTION_MODEL = "whisper-large-v3"
 AVAILABLE_GROQ_MODELS = [
+    "qwen/qwen3.8-27b",
     "llama-3.3-70b-versatile",
     "llama-3.1-70b-versatile",
     "llama-3.1-8b-instant",
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
     "mixtral-8x7b-32768",
-    "gemma2-9b-it",
 ]
 
 

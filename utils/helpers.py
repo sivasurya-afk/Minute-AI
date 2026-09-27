@@ -15,18 +15,19 @@ def compute_content_hash(text: str) -> str:
 
 
 def get_status_badge(status: str) -> str:
-    """Return HTML badge snippet with modern styling for task status."""
+    """Return HTML badge snippet with modern dark-slate SaaS styling for task status."""
     status_map = {
-        "Pending Review": {"bg": "#FEF3C7", "text": "#92400E", "border": "#FCD34D"},
-        "Approved": {"bg": "#D1FAE5", "text": "#065F46", "border": "#6EE7B7"},
-        "Needs Clarification": {"bg": "#E0E7FF", "text": "#3730A3", "border": "#A5B4FC"},
-        "Rejected": {"bg": "#FEE2E2", "text": "#991B1B", "border": "#FCA5A5"},
+        "Pending Review": {"bg": "rgba(245, 158, 11, 0.12)", "text": "#FBBF24", "border": "rgba(245, 158, 11, 0.35)", "dot": "#F59E0B"},
+        "Approved": {"bg": "rgba(16, 185, 129, 0.12)", "text": "#34D399", "border": "rgba(16, 185, 129, 0.35)", "dot": "#10B981"},
+        "Needs Clarification": {"bg": "rgba(99, 102, 241, 0.12)", "text": "#A5B4FC", "border": "rgba(99, 102, 241, 0.35)", "dot": "#6366F1"},
+        "Rejected": {"bg": "rgba(244, 63, 94, 0.12)", "text": "#FB7185", "border": "rgba(244, 63, 94, 0.35)", "dot": "#F43F5E"},
     }
-    style = status_map.get(status, {"bg": "#F3F4F6", "text": "#374151", "border": "#D1D5DB"})
+    style = status_map.get(status, {"bg": "rgba(148, 163, 184, 0.12)", "text": "#CBD5E1", "border": "rgba(148, 163, 184, 0.3)", "dot": "#94A3B8"})
     return (
-        f'<span style="background-color: {style["bg"]}; color: {style["text"]}; '
-        f'border: 1px solid {style["border"]}; padding: 3px 8px; border-radius: 9999px; '
-        f'font-size: 0.78rem; font-weight: 600; display: inline-block;">'
+        f'<span style="background: {style["bg"]}; color: {style["text"]}; '
+        f'border: 1px solid {style["border"]}; padding: 3px 9px; border-radius: 9999px; '
+        f'font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.2);">'
+        f'<span style="width: 6px; height: 6px; border-radius: 50%; background-color: {style["dot"]}; box-shadow: 0 0 6px {style["dot"]}; display: inline-block;"></span>'
         f'{status}</span>'
     )
 
@@ -34,20 +35,21 @@ def get_status_badge(status: str) -> str:
 def get_priority_badge(priority: Optional[str]) -> str:
     """Return HTML badge snippet for task priority."""
     if not priority:
-        return '<span style="color: #9CA3AF; font-size: 0.8rem;">—</span>'
+        return '<span style="color: #64748B; font-size: 0.8rem;">—</span>'
 
     priority_map = {
-        "Highest": {"bg": "#FEE2E2", "text": "#991B1B", "border": "#EF4444"},
-        "High": {"bg": "#FFEDD5", "text": "#9A3412", "border": "#F97316"},
-        "Medium": {"bg": "#FEF9C3", "text": "#854D0E", "border": "#EAB308"},
-        "Low": {"bg": "#E0F2FE", "text": "#075985", "border": "#38BDF8"},
-        "Lowest": {"bg": "#F3F4F6", "text": "#4B5563", "border": "#9CA3AF"},
+        "Highest": {"bg": "rgba(239, 68, 68, 0.15)", "text": "#F87171", "border": "rgba(239, 68, 68, 0.35)", "dot": "#EF4444"},
+        "High": {"bg": "rgba(249, 115, 22, 0.15)", "text": "#FB923C", "border": "rgba(249, 115, 22, 0.35)", "dot": "#F97316"},
+        "Medium": {"bg": "rgba(234, 179, 8, 0.15)", "text": "#FACC15", "border": "rgba(234, 179, 8, 0.35)", "dot": "#EAB308"},
+        "Low": {"bg": "rgba(59, 130, 246, 0.15)", "text": "#60A5FA", "border": "rgba(59, 130, 246, 0.35)", "dot": "#3B82F6"},
+        "Lowest": {"bg": "rgba(148, 163, 184, 0.12)", "text": "#94A3B8", "border": "rgba(148, 163, 184, 0.25)", "dot": "#64748B"},
     }
-    style = priority_map.get(priority, {"bg": "#F3F4F6", "text": "#4B5563", "border": "#9CA3AF"})
+    style = priority_map.get(priority, {"bg": "rgba(148, 163, 184, 0.12)", "text": "#94A3B8", "border": "rgba(148, 163, 184, 0.25)", "dot": "#64748B"})
     return (
-        f'<span style="background-color: {style["bg"]}; color: {style["text"]}; '
-        f'border: 1px solid {style["border"]}; padding: 2px 7px; border-radius: 6px; '
-        f'font-size: 0.75rem; font-weight: 600;">'
+        f'<span style="background: {style["bg"]}; color: {style["text"]}; '
+        f'border: 1px solid {style["border"]}; padding: 2px 8px; border-radius: 6px; '
+        f'font-size: 0.73rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">'
+        f'<span style="width: 5px; height: 5px; border-radius: 50%; background-color: {style["dot"]};"></span>'
         f'{priority}</span>'
     )
 
@@ -55,17 +57,39 @@ def get_priority_badge(priority: Optional[str]) -> str:
 def get_type_badge(action_type: str) -> str:
     """Return HTML badge snippet for action item type."""
     type_map = {
-        "bug": {"bg": "#FEE2E2", "text": "#B91C1C", "icon": "🐛"},
-        "feature": {"bg": "#DCFCE7", "text": "#15803D", "icon": "✨"},
-        "investigation": {"bg": "#F3E8FF", "text": "#6B21A8", "icon": "🔍"},
-        "follow-up": {"bg": "#E0F2FE", "text": "#0369A1", "icon": "📌"},
-        "task": {"bg": "#F1F5F9", "text": "#475569", "icon": "📋"},
+        "bug": {"bg": "rgba(239, 68, 68, 0.12)", "text": "#FCA5A5", "border": "rgba(239, 68, 68, 0.25)", "icon": "🐛"},
+        "feature": {"bg": "rgba(16, 185, 129, 0.12)", "text": "#6EE7B7", "border": "rgba(16, 185, 129, 0.25)", "icon": "✨"},
+        "investigation": {"bg": "rgba(168, 85, 247, 0.12)", "text": "#D8B4FE", "border": "rgba(168, 85, 247, 0.25)", "icon": "🔍"},
+        "follow-up": {"bg": "rgba(56, 189, 248, 0.12)", "text": "#7DD3FC", "border": "rgba(56, 189, 248, 0.25)", "icon": "📌"},
+        "task": {"bg": "rgba(148, 163, 184, 0.12)", "text": "#CBD5E1", "border": "rgba(148, 163, 184, 0.25)", "icon": "📋"},
     }
-    style = type_map.get(action_type, {"bg": "#F1F5F9", "text": "#475569", "icon": "📋"})
+    style = type_map.get(action_type, {"bg": "rgba(148, 163, 184, 0.12)", "text": "#CBD5E1", "border": "rgba(148, 163, 184, 0.25)", "icon": "📋"})
     return (
-        f'<span style="background-color: {style["bg"]}; color: {style["text"]}; '
-        f'padding: 2px 7px; border-radius: 6px; font-size: 0.75rem; font-weight: 500;">'
+        f'<span style="background: {style["bg"]}; color: {style["text"]}; border: 1px solid {style["border"]}; '
+        f'padding: 2px 8px; border-radius: 6px; font-size: 0.73rem; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">'
         f'{style["icon"]} {action_type}</span>'
+    )
+
+
+def get_confidence_badge(score: float) -> str:
+    """Return HTML badge snippet with visual progress bar for AI confidence score."""
+    pct = int(score * 100) if score <= 1.0 else int(score)
+    if pct >= 85:
+        color = "#10B981"
+        bg = "rgba(16, 185, 129, 0.12)"
+    elif pct >= 70:
+        color = "#F59E0B"
+        bg = "rgba(245, 158, 11, 0.12)"
+    else:
+        color = "#EF4444"
+        bg = "rgba(239, 68, 68, 0.12)"
+
+    return (
+        f'<div style="display: inline-flex; align-items: center; gap: 6px; background: {bg}; padding: 2px 7px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; color: {color}; border: 1px solid {color}33;">'
+        f'<span>AI {pct}%</span>'
+        f'<div style="width: 28px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden;">'
+        f'<div style="width: {pct}%; height: 100%; background: {color};"></div>'
+        f'</div></div>'
     )
 
 

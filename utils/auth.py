@@ -141,12 +141,19 @@ def render_auth_page():
     with col2:
         st.markdown(
             """
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <div style="font-size: 3rem; margin-bottom: 0.5rem;">⏱️</div>
-                <h1 style="margin: 0; font-size: 2.2rem; font-weight: 700; color: #1E293B;">Minute AI</h1>
-                <p style="color: #64748B; font-size: 1rem; margin-top: 0.5rem;">
+            <div style="text-align: center; margin-bottom: 2rem; margin-top: 1rem;">
+                <div style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, #6366F1, #8B5CF6); display: inline-flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 0 25px rgba(99, 102, 241, 0.4); margin-bottom: 12px;">
+                    ⏱️
+                </div>
+                <h1 style="margin: 0; font-size: 2.2rem; font-weight: 800; color: #F8FAFC; letter-spacing: -0.03em;">Minute AI</h1>
+                <p style="color: #94A3B8; font-size: 0.95rem; margin-top: 6px;">
                     AI-Powered Meeting Transcript to Jira Action Item Dashboard
                 </p>
+                <div style="display: inline-flex; gap: 8px; margin-top: 4px;">
+                    <span style="background: rgba(99, 102, 241, 0.12); color: #A5B4FC; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Groq Whisper V3</span>
+                    <span style="background: rgba(16, 185, 129, 0.12); color: #34D399; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Qwen 2.5 AI</span>
+                    <span style="background: rgba(56, 189, 248, 0.12); color: #7DD3FC; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;">Supabase RLS</span>
+                </div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -155,19 +162,45 @@ def render_auth_page():
         has_supabase = get_supabase_auth_client() is not None
 
         if not has_supabase:
-            st.info(
-                "💡 **Offline / Evaluation Mode**: Supabase credentials are not configured in your `.env`. "
-                "You can continue immediately with **Demo Mode** to test all features with local in-memory storage.",
-                icon="ℹ️"
+            st.markdown(
+                """
+                <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px;">
+                    <div style="font-weight: 700; color: #A5B4FC; font-size: 0.85rem; margin-bottom: 2px;">⚡ Instant Demo & Evaluation Ready</div>
+                    <div style="font-size: 0.78rem; color: #94A3B8; line-height: 1.4;">
+                        Supabase credentials can be connected anytime. You can explore all features right now with <b>Demo Mode</b>.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
 
-        tab_login, tab_register, tab_demo = st.tabs(["Sign In", "Create Account", "Explore Demo Mode"])
+        tab_demo, tab_login, tab_register = st.tabs(["🚀 Instant Demo Mode", "🔑 Sign In", "✨ Create Account"])
+
+        with tab_demo:
+            st.markdown(
+                """
+                <div style="padding: 10px 0;">
+                    <p style="font-size: 0.88rem; color: #CBD5E1; line-height: 1.5;">
+                        Test Minute AI immediately with pre-loaded mock data and live Groq AI extraction:
+                    </p>
+                    <ul style="font-size: 0.82rem; color: #94A3B8; line-height: 1.6;">
+                        <li>Pre-loaded with 3 Jira projects (Frontend, Core API, DevOps)</li>
+                        <li>Sample meetings with verified action items and priorities</li>
+                        <li>Full access to Plotly charts, multi-format transcript upload, and exports</li>
+                    </ul>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            if st.button("Launch Minute AI as Demo User →", use_container_width=True, type="primary"):
+                login_demo_mode()
+                st.rerun()
 
         with tab_login:
             with st.form("login_form", clear_on_submit=False):
                 email = st.text_input("Email", placeholder="you@company.com", key="login_email")
                 password = st.text_input("Password", type="password", placeholder="••••••••", key="login_password")
-                submit = st.form_submit_button("Sign In", use_container_width=True, type="primary")
+                submit = st.form_submit_button("Sign In to Account", use_container_width=True, type="primary")
 
                 if submit:
                     if not email or not password:
@@ -183,9 +216,9 @@ def render_auth_page():
         with tab_register:
             with st.form("register_form", clear_on_submit=False):
                 name = st.text_input("Full Name", placeholder="Jane Doe", key="reg_name")
-                reg_email = st.text_input("Email", placeholder="you@company.com", key="reg_email")
+                reg_email = st.text_input("Work Email", placeholder="you@company.com", key="reg_email")
                 reg_password = st.text_input("Password", type="password", placeholder="At least 6 characters", key="reg_password")
-                submit_reg = st.form_submit_button("Create Account", use_container_width=True, type="primary")
+                submit_reg = st.form_submit_button("Create Enterprise Account", use_container_width=True, type="primary")
 
                 if submit_reg:
                     if not name or not reg_email or not reg_password:
@@ -198,16 +231,3 @@ def render_auth_page():
                                 st.rerun()
                         else:
                             st.error(message)
-
-        with tab_demo:
-            st.markdown(
-                """
-                **Demo Mode** allows instant evaluation of Minute AI without any Supabase setup.
-                - Features pre-loaded sample meetings and Jira projects
-                - Full access to all dashboard charts, transcript processing, and action items editing
-                - Safely isolates data during your browser session
-                """
-            )
-            if st.button("🚀 Enter Minute AI as Demo User", use_container_width=True, type="secondary"):
-                login_demo_mode()
-                st.rerun()
