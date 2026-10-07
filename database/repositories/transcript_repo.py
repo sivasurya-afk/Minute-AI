@@ -5,8 +5,11 @@ Operates on Supabase PostgreSQL with automatic fallback to MockDatabase.
 
 from typing import List, Dict, Any, Optional
 import uuid
+import logging
 from datetime import datetime, date
 from database.supabase_client import get_supabase_client, MockDatabase
+
+logger = logging.getLogger(__name__)
 
 
 class TranscriptRepository:
@@ -19,20 +22,24 @@ class TranscriptRepository:
     def get_transcripts(self, user_id: str) -> List[Dict[str, Any]]:
         """Fetch all transcripts owned by user with action item counts."""
         if self.client:
-            res = (
-                self.client.table("transcripts")
-                .select("*, action_items(id, status)")
-                .eq("user_id", user_id)
-                .order("created_at", desc=True)
-                .execute()
-            )
-            data = res.data or []
-            # Calculate action item counts
-            for row in data:
-                items = row.get("action_items") or []
-                row["action_item_count"] = len(items)
-                row["approved_count"] = len([i for i in items if i.get("status") == "Approved"])
-            return data
+            try:
+                res = (
+                    self.client.table("transcripts")
+                    .select("*, action_items(id, status)")
+                    .eq("user_id", user_id)
+                    .order("created_at", desc=True)
+                    .execute()
+                )
+                data = res.data or []
+                if data or user_id != "00000000-0000-0000-0000-000000000001":
+                    # Calculate action item counts
+                    for row in data:
+                        items = row.get("action_items") or []
+                        row["action_item_count"] = len(items)
+                        row["approved_count"] = len([i for i in items if i.get("status") == "Approved"])
+                    return data
+            except Exception as e:
+                logger.warning(f"Supabase get_transcripts failed, falling back to mock database: {e}")
 
         # Mock fallback
         transcripts = [
@@ -54,8 +61,12 @@ class TranscriptRepository:
     def get_transcript_by_id(self, user_id: str, transcript_id: str) -> Optional[Dict[str, Any]]:
         """Fetch a single transcript by ID."""
         if self.client:
-            res = self.client.table("transcripts").select("*").eq("id", transcript_id).eq("user_id", user_id).execute()
-            return res.data[0] if res.data else None
+            try:
+                res = self.client.table("transcripts").select("*").eq("id", transcript_id).eq("user_id", user_id).execute()
+                if res.data:
+                    return res.data[0]
+            except Exception as e:
+                logger.warning(f"Supabase get_transcript_by_id failed: {e}")
 
         for t in self.mock_db.transcripts:
             if t["id"] == transcript_id:
@@ -66,15 +77,19 @@ class TranscriptRepository:
         """Check if a transcript with identical meeting name and date already exists."""
         clean_name = meeting_name.strip().lower()
         if self.client:
-            res = (
-                self.client.table("transcripts")
-                .select("id, meeting_name, meeting_date")
-                .eq("user_id", user_id)
-                .ilike("meeting_name", clean_name)
-                .eq("meeting_date", meeting_date)
-                .execute()
-            )
-            return res.data[0] if res.data else None
+            try:
+                res = (
+                    self.client.table("transcripts")
+                    .select("id, meeting_name, meeting_date")
+                    .eq("user_id", user_id)
+                    .ilike("meeting_name", clean_name)
+                    .eq("meeting_date", str(meeting_date))
+                    .execute()
+                )
+                if res.data:
+                    return res.data[0]
+            except Exception as e:
+                logger.warning(f"Supabase find_duplicate failed: {e}")
 
         for t in self.mock_db.transcripts:
             if (
@@ -100,8 +115,11 @@ class TranscriptRepository:
         }
 
         if self.client:
-            res = self.client.table("transcripts").insert(record).execute()
-            return res.data[0] if res.data else record
+            try:
+                res = self.client.table("transcripts").insert(record).execute()
+                return res.data[0] if res.data else record
+            except Exception as e:
+                logger.warning(f"Supabase create_transcript failed, falling back to mock database: {e}")
 
         self.mock_db.transcripts.append(record)
         return record
@@ -110,14 +128,18 @@ class TranscriptRepository:
         """Update processing status of transcript."""
         update_data = {"processing_status": status, "updated_at": datetime.now().isoformat()}
         if self.client:
-            res = (
-                self.client.table("transcripts")
-                .update(update_data)
-                .eq("id", transcript_id)
-                .eq("user_id", user_id)
-                .execute()
-            )
-            return res.data[0] if res.data else update_data
+            try:
+                res = (
+                    self.client.table("transcripts")
+                    .update(update_data)
+                    .eq("id", transcript_id)
+                    .eq("user_id", user_id)
+                    .execute()
+                )
+                if res.data:
+                    return res.data[0]
+            except Exception as e:
+                logger.warning(f"Supabase update_status failed: {e}")
 
         for t in self.mock_db.transcripts:
             if t["id"] == transcript_id:
@@ -128,8 +150,11 @@ class TranscriptRepository:
     def delete_transcript(self, user_id: str, transcript_id: str) -> bool:
         """Delete transcript and cascade delete associated action items."""
         if self.client:
-            self.client.table("transcripts").delete().eq("id", transcript_id).eq("user_id", user_id).execute()
-            return True
+            try:
+                self.client.table("transcripts").delete().eq("id", transcript_id).eq("user_id", user_id).execute()
+                return True
+            except Exception as e:
+                logger.warning(f"Supabase delete_transcript failed: {e}")
 
         initial_len = len(self.mock_db.transcripts)
         self.mock_db.transcripts = [t for t in self.mock_db.transcripts if t["id"] != transcript_id]

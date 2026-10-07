@@ -15,11 +15,10 @@ from utils.helpers import (
     format_iso_date,
 )
 from utils.auth import (
-    is_authenticated,
-    get_current_user,
-    get_current_user_id,
-    render_auth_page,
-    logout,
+    DEMO_USER,
+    get_supabase_auth_client,
+    login_user,
+    register_user,
 )
 
 __all__ = [
@@ -35,9 +34,8 @@ __all__ = [
     "calculate_jaccard_similarity",
     "deduplicate_extracted_items",
     "format_iso_date",
-    "is_authenticated",
-    "get_current_user",
-    "get_current_user_id",
-    "render_auth_page",
-    "logout",
+    "DEMO_USER",
+    "get_supabase_auth_client",
+    "login_user",
+    "register_user",
 ]

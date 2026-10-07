@@ -190,3 +190,74 @@ class ActionExtractor:
             chunks.append("\n\n".join(current_chunk))
 
         return chunks if chunks else [text]
+
+
+def generate_offline_extracted_items(text: str, active_projects: list) -> list:
+    """Generate deterministic parsed items when running in demo/offline mode without Groq key."""
+    import re
+    items = []
+    lines = text.split("\n")
+
+    proj_map = {p["project_key"]: p for p in active_projects}
+    keys = list(proj_map.keys())
+
+    for line in lines:
+        line_clean = line.strip()
+        commitment_match = re.search(r"(?:([A-Z][a-zA-Z0-9_\s]+):)?.*?\b(I will|I'll|will|shall|can you)\s+([^\.]+)", line_clean, re.IGNORECASE)
+        if commitment_match:
+            speaker = (commitment_match.group(1) or "").strip() or None
+            task_desc = commitment_match.group(3).strip()
+
+            assigned_key = None
+            assigned_id = None
+            task_lower = task_desc.lower()
+
+            for p in active_projects:
+                for kw in p.get("keywords", []):
+                    if kw.lower() in task_lower:
+                        assigned_key = p["project_key"]
+                        assigned_id = p["id"]
+                        break
+                if assigned_key:
+                    break
+
+            if not assigned_key and keys:
+                assigned_key = keys[0]
+                assigned_id = proj_map[keys[0]]["id"]
+
+            items.append({
+                "action_title": task_desc.capitalize()[:80],
+                "description": f"Extracted task from discussion: {task_desc}.",
+                "assignee": speaker,
+                "project_id": assigned_id,
+                "jira_project_key": assigned_key,
+                "priority": "High" if "urgent" in task_lower or "critical" in task_lower else "Medium",
+                "due_date": "This Sprint",
+                "action_type": "bug" if "bug" in task_lower or "fix" in task_lower else "task",
+                "source_excerpt": line_clean,
+                "confidence_score": 0.90 if assigned_key else 0.65,
+                "clarification_required": not bool(assigned_key),
+                "clarification_reason": None if assigned_key else "Could not confidently map to active projects.",
+            })
+
+    if not items:
+        items.append({
+            "action_title": "Review meeting minutes and action items",
+            "description": "Follow up on discussion points highlighted during the meeting.",
+            "assignee": None,
+            "project_id": active_projects[0]["id"] if active_projects else None,
+            "jira_project_key": active_projects[0]["project_key"] if active_projects else None,
+            "priority": "Medium",
+            "due_date": None,
+            "action_type": "follow-up",
+            "source_excerpt": text[:120],
+            "confidence_score": 0.80,
+            "clarification_required": True,
+            "clarification_reason": "No explicit owner assigned in discussion.",
+        })
+
+    return items
+
+
+_generate_offline_extracted_items = generate_offline_extracted_items
+

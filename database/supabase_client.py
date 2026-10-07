@@ -11,11 +11,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+_client_cache: Dict[str, Any] = {}
+
+
 def get_supabase_client(access_token: Optional[str] = None):
     """
     Returns an authenticated Supabase client using anon key, service role key, or user access token.
     Enforces Row Level Security (RLS) on PostgreSQL.
+    Caches client instances to prevent connection pool exhaustion and TLS handshakes.
     """
+    cache_key = access_token or "__default__"
+    if cache_key in _client_cache:
+        return _client_cache[cache_key]
+
     url = os.getenv("SUPABASE_URL", "")
     anon_key = os.getenv("SUPABASE_ANON_KEY", "")
     service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
@@ -31,11 +39,13 @@ def get_supabase_client(access_token: Optional[str] = None):
     try:
         from supabase import create_client, ClientOptions
 
-        options = ClientOptions()
+        options = ClientOptions(postgrest_client_timeout=10.0)
         if access_token:
             options.headers = {"Authorization": f"Bearer {access_token}"}
 
-        return create_client(url, api_key, options=options)
+        client = create_client(url, api_key, options=options)
+        _client_cache[cache_key] = client
+        return client
     except Exception:
         return None
 

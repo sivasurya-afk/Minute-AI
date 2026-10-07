@@ -5,8 +5,11 @@ Operates on Supabase PostgreSQL with automatic fallback to MockDatabase.
 
 from typing import List, Dict, Any, Optional
 import uuid
+import logging
 from datetime import datetime
 from database.supabase_client import get_supabase_client, MockDatabase
+
+logger = logging.getLogger(__name__)
 
 
 class ProjectRepository:
@@ -19,11 +22,15 @@ class ProjectRepository:
     def get_projects(self, user_id: str, active_only: bool = False) -> List[Dict[str, Any]]:
         """Fetch all Jira projects owned by user."""
         if self.client:
-            query = self.client.table("jira_projects").select("*").eq("user_id", user_id)
-            if active_only:
-                query = query.eq("is_active", True)
-            res = query.order("project_name").execute()
-            return res.data or []
+            try:
+                query = self.client.table("jira_projects").select("*").eq("user_id", user_id)
+                if active_only:
+                    query = query.eq("is_active", True)
+                res = query.order("project_name").execute()
+                if res.data or user_id != "00000000-0000-0000-0000-000000000001":
+                    return res.data or []
+            except Exception as e:
+                logger.warning(f"Supabase get_projects failed, falling back to mock database: {e}")
 
         # Mock fallback
         projects = [
@@ -37,8 +44,12 @@ class ProjectRepository:
     def get_project_by_id(self, user_id: str, project_id: str) -> Optional[Dict[str, Any]]:
         """Fetch single project by ID."""
         if self.client:
-            res = self.client.table("jira_projects").select("*").eq("id", project_id).eq("user_id", user_id).execute()
-            return res.data[0] if res.data else None
+            try:
+                res = self.client.table("jira_projects").select("*").eq("id", project_id).eq("user_id", user_id).execute()
+                if res.data:
+                    return res.data[0]
+            except Exception as e:
+                logger.warning(f"Supabase get_project_by_id failed: {e}")
 
         for p in self.mock_db.projects:
             if p["id"] == project_id:
@@ -49,8 +60,12 @@ class ProjectRepository:
         """Fetch project by uppercase project key."""
         key = project_key.strip().upper()
         if self.client:
-            res = self.client.table("jira_projects").select("*").eq("project_key", key).eq("user_id", user_id).execute()
-            return res.data[0] if res.data else None
+            try:
+                res = self.client.table("jira_projects").select("*").eq("project_key", key).eq("user_id", user_id).execute()
+                if res.data:
+                    return res.data[0]
+            except Exception as e:
+                logger.warning(f"Supabase get_project_by_key failed: {e}")
 
         for p in self.mock_db.projects:
             if p.get("project_key", "").upper() == key:
@@ -79,8 +94,11 @@ class ProjectRepository:
         }
 
         if self.client:
-            res = self.client.table("jira_projects").insert(record).execute()
-            return res.data[0] if res.data else record
+            try:
+                res = self.client.table("jira_projects").insert(record).execute()
+                return res.data[0] if res.data else record
+            except Exception as e:
+                logger.warning(f"Supabase create_project failed, falling back to mock database: {e}")
 
         self.mock_db.projects.append(record)
         return record
@@ -92,14 +110,18 @@ class ProjectRepository:
             update_data["project_key"] = update_data["project_key"].strip().upper()
 
         if self.client:
-            res = (
-                self.client.table("jira_projects")
-                .update(update_data)
-                .eq("id", project_id)
-                .eq("user_id", user_id)
-                .execute()
-            )
-            return res.data[0] if res.data else update_data
+            try:
+                res = (
+                    self.client.table("jira_projects")
+                    .update(update_data)
+                    .eq("id", project_id)
+                    .eq("user_id", user_id)
+                    .execute()
+                )
+                if res.data:
+                    return res.data[0]
+            except Exception as e:
+                logger.warning(f"Supabase update_project failed: {e}")
 
         for p in self.mock_db.projects:
             if p["id"] == project_id:
@@ -110,8 +132,11 @@ class ProjectRepository:
     def delete_project(self, user_id: str, project_id: str) -> bool:
         """Delete project by ID."""
         if self.client:
-            self.client.table("jira_projects").delete().eq("id", project_id).eq("user_id", user_id).execute()
-            return True
+            try:
+                self.client.table("jira_projects").delete().eq("id", project_id).eq("user_id", user_id).execute()
+                return True
+            except Exception as e:
+                logger.warning(f"Supabase delete_project failed: {e}")
 
         initial_len = len(self.mock_db.projects)
         self.mock_db.projects = [p for p in self.mock_db.projects if p["id"] != project_id]

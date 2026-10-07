@@ -171,9 +171,12 @@ DEFAULT_PRIORITY=Medium
 ### 4. Run the Application
 
 ```bash
-streamlit run app.py
+./run.sh
 ```
-Open your browser to `http://localhost:8501`.
+Open your browser to [http://localhost:8000](http://localhost:8000).
+- **Modern Minimalist UI**: [http://localhost:8000](http://localhost:8000)
+- **Interactive OpenAPI Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Health Check**: [http://localhost:8000/health](http://localhost:8000/health)
 
 ---
 

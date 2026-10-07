@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Minute AI - Meeting Transcript to Jira Action Item Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-primary": "#c3c0ff",
+            "on-secondary": "#ffffff",
+            "on-primary-fixed-variant": "#3323cc",
+            "background": "#f9f9ff",
+            "tertiary-container": "#885500",
+            "on-surface-variant": "#464555",
+            "primary-fixed": "#e2dfff",
+            "inverse-surface": "#293040",
+            "surface-tint": "#4d44e3",
+            "on-tertiary-container": "#ffd4a4",
+            "primary": "#3525cd",
+            "error-container": "#ffdad6",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-fixed": "#002113",
+            "on-surface": "#141b2b",
+            "surface-variant": "#dce2f7",
+            "on-background": "#141b2b",
+            "on-error-container": "#93000a",
+            "tertiary-fixed-dim": "#ffb95f",
+            "on-primary-container": "#dad7ff",
+            "error": "#ba1a1a",
+            "on-tertiary-fixed": "#2a1700",
+            "secondary-fixed-dim": "#4edea3",
+            "on-secondary-container": "#00714d",
+            "surface-bright": "#f9f9ff",
+            "surface-dim": "#d3daef",
+            "on-error": "#ffffff",
+            "on-primary-fixed": "#0f0069",
+            "secondary-container": "#6cf8bb",
+            "tertiary": "#684000",
+            "on-tertiary-fixed-variant": "#653e00",
+            "secondary-fixed": "#6ffbbe",
+            "inverse-on-surface": "#edf0ff",
+            "surface-container-high": "#e1e8fd",
+            "on-tertiary": "#ffffff",
+            "surface-container": "#e9edff",
+            "outline": "#777587",
+            "surface": "#f9f9ff",
+            "primary-fixed-dim": "#c3c0ff",
+            "tertiary-fixed": "#ffddb8",
+            "primary-container": "#4f46e5",
+            "secondary": "#006c49",
+            "on-primary": "#ffffff",
+            "surface-container-low": "#f1f3ff",
+            "surface-container-highest": "#dce2f7",
+            "on-secondary-fixed-variant": "#005236",
+            "outline-variant": "#c7c4d8"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "2rem",
+            "margin-mobile": "1rem",
+            "space-xs": "0.25rem",
+            "space-lg": "1.5rem",
+            "gutter-lg": "2rem",
+            "space-xl": "2rem",
+            "gutter-sm": "1rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem",
+            "gutter": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "label-sm": ["Inter"],
+            "code-sm": ["JetBrains Mono"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "label-md": ["Inter"],
+            "display-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "code-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500" }],
+            "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-surface text-on-surface antialiased font-body-md min-h-screen flex flex-col">
+<!-- TOP APP BAR / NAVIGATION (From Shared Component JSON) -->
+<header class="bg-surface-container-lowest dark:bg-inverse-surface docked full-width top-0 sticky z-50 h-16 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none">
+<div class="w-full max-w-[1600px] mx-auto px-margin flex items-center justify-between h-full">
+<!-- Brand & Left Navigation Cluster -->
+<div class="flex items-center gap-8 h-full">
+<!-- Brand Logo Lockup -->
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-[20px]" data-icon="graphic_eq">graphic_eq</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-headline-sm font-headline-lg font-bold text-on-surface dark:text-inverse-on-surface tracking-tight">Minute AI</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-label-sm font-semibold bg-surface-container text-primary border border-outline-variant">Enterprise</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-6 h-full">
+<!-- Active: Dashboard -->
+<a class="text-primary dark:text-inverse-primary font-semibold border-b-2 border-primary dark:border-inverse-primary pb-5 pt-5 text-label-md font-label-md flex items-center gap-1.5 transition-colors" href="#">
+<span>Dashboard</span>
+</a>
+<!-- Inactive: Process Transcript -->
+<a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-on-surface dark:hover:text-inverse-on-surface pb-5 pt-5 text-label-md font-label-md transition-colors" href="#">
+<span>Process Transcript</span>
+</a>
+<!-- Inactive: Action Items (with badge) -->
+<a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-on-surface dark:hover:text-inverse-on-surface pb-5 pt-5 text-label-md font-label-md flex items-center gap-1.5 transition-colors" href="#">
+<span>Action Items</span>
+<span class="px-1.5 py-0.2 rounded-full text-[11px] font-semibold bg-primary-container text-on-primary">12</span>
+</a>
+<!-- Inactive: History -->
+<a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-on-surface dark:hover:text-inverse-on-surface pb-5 pt-5 text-label-md font-label-md transition-colors" href="#">
+<span>History</span>
+</a>
+<!-- Inactive: Jira Projects -->
+<a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-on-surface dark:hover:text-inverse-on-surface pb-5 pt-5 text-label-md font-label-md transition-colors" href="#">
+<span>Jira Projects</span>
+</a>
+<!-- Inactive: Settings -->
+<a class="text-on-surface-variant dark:text-surface-variant font-medium hover:text-on-surface dark:hover:text-inverse-on-surface pb-5 pt-5 text-label-md font-label-md transition-colors" href="#">
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Right Navigation Actions & User Panel -->
+<div class="flex items-center gap-3.5">
+<!-- Global Search Input -->
+<div class="relative hidden xl:block w-72">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-[18px]" data-icon="search">search</span>
+</span>
+<input class="w-full pl-9 pr-4 py-1.5 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-all" placeholder="Search transcripts, tickets... ⌘K" type="text"/>
+</div>
+<!-- Jira Live Sync Indicator Badge -->
+<div class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface-container border border-outline-variant">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+</span>
+<span class="text-code-sm font-code-sm text-on-surface">Jira: Synced 2m ago</span>
+</div>
+<!-- Trailing Action: Sync Now Button -->
+<button class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-surface-container text-on-surface text-label-md font-label-md shadow-sm active:scale-[0.98] transition-transform" type="button">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="sync">sync</span>
+<span>Sync Now</span>
+</button>
+<!-- Trailing Action: Upload Button -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary-container text-on-primary hover:opacity-95 text-label-md font-label-md shadow-sm active:scale-[0.98] transition-transform" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="upload">upload</span>
+<span>Upload</span>
+</button>
+<!-- Notification Bell Icon -->
+<button class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface-container-lowest"></span>
+</button>
+<div class="h-6 w-px bg-outline-variant"></div>
+<!-- User Profile Pill -->
+<div class="flex items-center gap-2 pl-1 cursor-pointer group">
+<img class="w-8 h-8 rounded-full border border-outline-variant object-cover" data-alt="A professional studio portrait of Sarah Chen, an Asian woman in her mid-thirties with a warm, confident expression and dark shoulder-length hair. She wears an indigo tailored blazer, illuminated with soft ambient studio lighting against a clean, modern off-white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWV3tuxsMxVGMNidmPeU2JQq0mo93OEiPULU7l9JoqjH8YDmrLE_NWvrzt5cPsAPPA8-bAOOT41PtWz3eIIM5q9S8t6iQGOC5IXhcZcss573Km3Q7E8i7k_XKD0tEHkmybII8b4M-gBFDZQx-WZNncJitIUUisiCdSFih13aDnzZvkxa8I34mK7nH6S5vuinix97HCOQp_RrDCs8VLBP5pvs3QWeypNudRu3Gvux7yyshrc-ugGoqARlvSGRyCDzJ-a4UuxFdTWnAB"/>
+<div class="hidden lg:flex flex-col text-left leading-tight">
+<span class="text-label-md font-label-md font-semibold text-on-surface">Sarah Chen</span>
+<span class="text-[11px] font-label-sm text-on-surface-variant">Head of Product</span>
+</div>
+<span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface transition-colors" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+</header>
+<!-- MAIN CANVAS -->
+<main class="w-full max-w-[1600px] mx-auto px-margin py-6 flex-1 flex flex-col gap-6">
+<!-- WELCOME HERO BANNER -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-space-lg shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+<!-- Ambient Gradient Accents -->
+<div class="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-primary-fixed opacity-30 blur-3xl pointer-events-none"></div>
+<div class="absolute right-48 -bottom-16 w-64 h-64 rounded-full bg-secondary-fixed opacity-20 blur-2xl pointer-events-none"></div>
+<!-- Welcome Content -->
+<div class="relative z-10 max-w-3xl">
+<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-surface-container border border-outline-variant mb-2.5">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-label-sm font-label-sm text-primary">Sprint 34 Active Synthesis Engine</span>
+</div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">Good morning, Sarah · Sprint 34 Execution</h1>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1.5">
+          Minute AI processed <span class="font-semibold text-on-surface">8 transcripts</span> this week. <span class="font-semibold text-primary">18 new action items</span> are pending your review before Jira dispatch to PROD &amp; DESIGN boards.
+        </p>
+</div>
+<!-- CTA Actions -->
+<div class="relative z-10 flex flex-wrap items-center gap-3">
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-surface-container-lowest border border-outline-variant hover:bg-surface-container text-on-surface font-label-md text-label-md shadow-sm transition-all active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary" data-icon="bolt">bolt</span>
+<span>Connect Live Meeting</span>
+</button>
+<button class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md hover:bg-primary shadow-sm transition-all active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="add_circle">add_circle</span>
+<span>+ Process New Transcript</span>
+</button>
+</div>
+</section>
+<!-- 6 SLEEK SUMMARY KPI CARDS (Level 1 Surface) -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+<!-- Card 1: Transcripts Analyzed -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-space-md shadow-sm hover:shadow-md hover:border-outline transition-all flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="text-label-sm font-label-sm uppercase tracking-wider text-outline">Transcripts Analyzed</span>
+<div class="w-8 h-8 rounded-md bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="description">description</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-display-lg font-display-lg text-on-surface">142</span>
+<span class="text-code-sm font-code-sm text-secondary font-semibold">+12%</span>
+</div>
+</div>
+<div class="pt-3 mt-3 border-t border-outline-variant/60 flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant">
+<span>vs. last month</span>
+<span class="text-primary hover:underline cursor-pointer">View all</span>
+</div>
+</div>
+<!-- Card 2: Action Items Extracted -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-space-md shadow-sm hover:shadow-md hover:border-outline transition-all flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="text-label-sm font-label-sm uppercase tracking-wider text-outline">Items Extracted</span>
+<div class="w-8 h-8 rounded-md bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="auto_awesome">auto_awesome</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-display-lg font-display-lg text-on-surface">384</span>
+<span class="text-code-sm font-code-sm text-on-surface-variant font-medium">4.8/mtg</span>
+</div>
+</div>
+<div class="pt-3 mt-3 border-t border-outline-variant/60 flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant">
+<span>Extraction yield</span>
+<span class="text-primary hover:underline cursor-pointer">Rules</span>
+</div>
+</div>
+<!-- Card 3: Synced to Jira -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-space-md shadow-sm hover:shadow-md hover:border-outline transition-all flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="text-label-sm font-label-sm uppercase tracking-wider text-outline">Synced to Jira</span>
+<div class="w-8 h-8 rounded-md bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-display-lg font-display-lg text-on-surface">326</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold bg-secondary-container/40 text-on-secondary-container">PROD-34</span>
+</div>
+</div>
+<div class="pt-3 mt-3 border-t border-outline-variant/60 flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant">
+<span>Direct push auto</span>
+<span class="text-secondary hover:underline cursor-pointer font-medium">Sprint backlog</span>
+</div>
+</div>
+<!-- Card 4: Pending Review -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-space-md shadow-sm hover:shadow-md hover:border-outline transition-all flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="text-label-sm font-label-sm uppercase tracking-wider text-outline">Pending Review</span>
+<div class="w-8 h-8 rounded-md bg-amber-50 flex items-center justify-center text-amber-700">
+<span class="material-symbols-outlined text-[18px]" data-icon="hourglass_top">hourglass_top</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-display-lg font-display-lg text-on-surface">18</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold bg-amber-100 text-amber-800">Action req.</span>
+</div>
+</div>
+<div class="pt-3 mt-3 border-t border-outline-variant/60 flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant">
+<span>Queue depth</span>
+<span class="text-amber-800 font-semibold hover:underline cursor-pointer">Review 18</span>
+</div>
+</div>
+<!-- Card 5: AI Accuracy -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-space-md shadow-sm hover:shadow-md hover:border-outline transition-all flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="text-label-sm font-label-sm uppercase tracking-wider text-outline">AI Accuracy</span>
+<div class="w-8 h-8 rounded-md bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="verified">verified</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-display-lg font-display-lg text-on-surface">98.4%</span>
+<span class="text-code-sm font-code-sm text-secondary font-semibold">+1.2%</span>
+</div>
+</div>
+<div class="pt-3 mt-3 border-t border-outline-variant/60 flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant">
+<span>Model confidence</span>
+<span class="text-primary hover:underline cursor-pointer">Telemetry</span>
+</div>
+</div>
+<!-- Card 6: Time Saved -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-space-md shadow-sm hover:shadow-md hover:border-outline transition-all flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="text-label-sm font-label-sm uppercase tracking-wider text-outline">Time Saved</span>
+<div class="w-8 h-8 rounded-md bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="schedule">schedule</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-display-lg font-display-lg text-on-surface">46.5<span class="text-headline-sm font-headline-sm ml-0.5">h</span></span>
+<span class="text-code-sm font-code-sm text-secondary font-semibold">Sprint 34</span>
+</div>
+</div>
+<div class="pt-3 mt-3 border-t border-outline-variant/60 flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant">
+<span>Triage automated</span>
+<span class="text-primary hover:underline cursor-pointer">Breakdown</span>
+</div>
+</div>
+</section>
+<!-- TWO ANALYTICS & INSIGHTS CHARTS -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Chart 1: Velocity & Jira Sync Rate (8 Cols) -->
+<div class="lg:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-outline-variant/60">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Action Item Velocity &amp; Jira Sync Rate</h2>
+<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-container text-on-surface-variant">Live telemetry</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Synthesis output compared against validated Jira pushes across weekday cycles</p>
+</div>
+<!-- Filter Pills -->
+<div class="inline-flex rounded-lg border border-outline-variant p-0.5 bg-surface-container-lowest text-label-sm font-label-sm">
+<button class="px-3 py-1 rounded-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Last 14 Days</button>
+<button class="px-3 py-1 rounded-md bg-surface-container text-primary font-semibold shadow-xs" type="button">This Sprint</button>
+<button class="px-3 py-1 rounded-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Q2 Overall</button>
+</div>
+</div>
+<!-- Chart Metric Highlights & Legend -->
+<div class="flex items-center justify-between mt-4">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-sm bg-primary-container"></span>
+<span class="text-label-sm font-label-sm text-on-surface">Items Extracted (74)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-sm bg-secondary"></span>
+<span class="text-label-sm font-label-sm text-on-surface">Pushed to Jira (68)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-1 bg-amber-500 rounded"></span>
+<span class="text-label-sm font-label-sm text-on-surface">Pending Triage (6)</span>
+</div>
+</div>
+<div class="text-code-sm font-code-sm text-on-surface-variant hidden sm:block">
+              Avg. Conversion: <span class="font-semibold text-secondary">91.8%</span>
+</div>
+</div>
+<!-- CSS Bar Graph Visualizer with Tooltip Simulation -->
+<div class="mt-8 space-y-5">
+<!-- Day 1: Mon -->
+<div class="grid grid-cols-12 items-center gap-3">
+<span class="col-span-2 text-code-sm font-code-sm text-on-surface-variant">Mon Jun 10</span>
+<div class="col-span-9 flex items-center gap-2">
+<div class="w-full bg-surface-container rounded-full h-3 overflow-hidden flex">
+<div class="bg-primary-container h-full rounded-l-full" style="width: 85%"></div>
+<div class="bg-secondary h-full" style="width: 80%"></div>
+</div>
+</div>
+<span class="col-span-1 text-right text-code-sm font-code-sm font-semibold text-on-surface">14/13</span>
+</div>
+<!-- Day 2: Tue -->
+<div class="grid grid-cols-12 items-center gap-3">
+<span class="col-span-2 text-code-sm font-code-sm text-on-surface-variant">Tue Jun 11</span>
+<div class="col-span-9 flex items-center gap-2">
+<div class="w-full bg-surface-container rounded-full h-3 overflow-hidden flex">
+<div class="bg-primary-container h-full rounded-l-full" style="width: 95%"></div>
+<div class="bg-secondary h-full" style="width: 90%"></div>
+</div>
+</div>
+<span class="col-span-1 text-right text-code-sm font-code-sm font-semibold text-on-surface">22/20</span>
+</div>
+<!-- Day 3: Wed (Peak) -->
+<div class="grid grid-cols-12 items-center gap-3">
+<span class="col-span-2 text-code-sm font-code-sm font-semibold text-primary">Wed Jun 12 (Peak)</span>
+<div class="col-span-9 flex items-center gap-2">
+<div class="w-full bg-surface-container rounded-full h-3 overflow-hidden flex ring-2 ring-primary-fixed">
+<div class="bg-primary-container h-full rounded-l-full" style="width: 100%"></div>
+<div class="bg-secondary h-full" style="width: 94%"></div>
+</div>
+</div>
+<span class="col-span-1 text-right text-code-sm font-code-sm font-bold text-primary">28/26</span>
+</div>
+<!-- Day 4: Thu -->
+<div class="grid grid-cols-12 items-center gap-3">
+<span class="col-span-2 text-code-sm font-code-sm text-on-surface-variant">Thu Jun 13</span>
+<div class="col-span-9 flex items-center gap-2">
+<div class="w-full bg-surface-container rounded-full h-3 overflow-hidden flex">
+<div class="bg-primary-container h-full rounded-l-full" style="width: 60%"></div>
+<div class="bg-secondary h-full" style="width: 55%"></div>
+</div>
+</div>
+<span class="col-span-1 text-right text-code-sm font-code-sm font-semibold text-on-surface">12/10</span>
+</div>
+<!-- Day 5: Fri (Today) -->
+<div class="grid grid-cols-12 items-center gap-3">
+<span class="col-span-2 text-code-sm font-code-sm text-on-surface-variant">Fri Jun 14</span>
+<div class="col-span-9 flex items-center gap-2">
+<div class="w-full bg-surface-container rounded-full h-3 overflow-hidden flex">
+<div class="bg-primary-container h-full rounded-l-full" style="width: 45%"></div>
+<div class="bg-secondary h-full" style="width: 40%"></div>
+</div>
+</div>
+<span class="col-span-1 text-right text-code-sm font-code-sm font-semibold text-on-surface">8/7</span>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/60 flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-secondary" data-icon="trending_up">trending_up</span>
+            Sync speed increased by 18% following Sprint 33 prompt tuning
+          </span>
+<button class="text-primary hover:underline text-label-md font-label-md" type="button">Export CSV</button>
+</div>
+</div>
+<!-- Chart 2: Project Breakdown & Priority Distribution (4 Cols) -->
+<div class="lg:col-span-4 bg-surface-container-lowest border border-outline-variant rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-4 border-b border-outline-variant/60">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Items by Jira Project</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Distribution across target backlogs</p>
+</div>
+<button class="p-1 rounded hover:bg-surface-container text-outline" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+<!-- Project Volume Bars -->
+<div class="mt-5 space-y-4">
+<!-- Project 1: CORE-ENG -->
+<div>
+<div class="flex items-center justify-between text-body-sm font-body-sm mb-1.5">
+<span class="font-semibold text-on-surface flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+                  CORE-ENG (Core Engineering)
+                </span>
+<span class="text-code-sm font-code-sm font-semibold text-on-surface">48% (156)</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2">
+<div class="bg-primary-container h-2 rounded-full" style="width: 48%"></div>
+</div>
+</div>
+<!-- Project 2: DESIGN-OPS -->
+<div>
+<div class="flex items-center justify-between text-body-sm font-body-sm mb-1.5">
+<span class="font-semibold text-on-surface flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+                  DESIGN-OPS (Experience System)
+                </span>
+<span class="text-code-sm font-code-sm font-semibold text-on-surface">24% (78)</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2">
+<div class="bg-secondary h-2 rounded-full" style="width: 24%"></div>
+</div>
+</div>
+<!-- Project 3: GROWTH -->
+<div>
+<div class="flex items-center justify-between text-body-sm font-body-sm mb-1.5">
+<span class="font-semibold text-on-surface flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                  GROWTH (Product Led Growth)
+                </span>
+<span class="text-code-sm font-code-sm font-semibold text-on-surface">18% (59)</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2">
+<div class="bg-amber-500 h-2 rounded-full" style="width: 18%"></div>
+</div>
+</div>
+<!-- Project 4: INFRA -->
+<div>
+<div class="flex items-center justify-between text-body-sm font-body-sm mb-1.5">
+<span class="font-semibold text-on-surface flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-outline"></span>
+                  INFRA (Cloud &amp; Reliability)
+                </span>
+<span class="text-code-sm font-code-sm font-semibold text-on-surface">10% (33)</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2">
+<div class="bg-outline h-2 rounded-full" style="width: 10%"></div>
+</div>
+</div>
+</div>
+<!-- Priority Slices Quick Matrix -->
+<div class="mt-6 pt-4 border-t border-outline-variant/60">
+<span class="text-label-sm font-label-sm uppercase tracking-wider text-outline block mb-2.5">Priority Triage Matrix</span>
+<div class="grid grid-cols-4 gap-2 text-center">
+<div class="p-2 rounded-lg bg-red-50 border border-red-100">
+<span class="block text-code-sm font-code-sm font-bold text-red-700">12</span>
+<span class="text-[11px] font-label-sm text-red-600">Critical</span>
+</div>
+<div class="p-2 rounded-lg bg-orange-50 border border-orange-100">
+<span class="block text-code-sm font-code-sm font-bold text-orange-700">64</span>
+<span class="text-[11px] font-label-sm text-orange-600">High</span>
+</div>
+<div class="p-2 rounded-lg bg-amber-50 border border-amber-100">
+<span class="block text-code-sm font-code-sm font-bold text-amber-800">148</span>
+<span class="text-[11px] font-label-sm text-amber-700">Medium</span>
+</div>
+<div class="p-2 rounded-lg bg-surface-container border border-outline-variant">
+<span class="block text-code-sm font-code-sm font-bold text-on-surface">102</span>
+<span class="text-[11px] font-label-sm text-on-surface-variant">Low</span>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-3 text-center">
+<a class="text-label-md font-label-md text-primary font-semibold hover:underline" href="#">Manage Jira Mapping Config →</a>
+</div>
+</div>
+</section>
+<!-- EXTRACTED ACTION ITEMS QUEUE (MAIN WORKFLOW SECTION) -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Section Header & Filter Toolbar -->
+<div class="p-space-lg border-b border-outline-variant flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-3">
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Pending Action Items for Jira Sync</h2>
+<span class="px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-primary-container text-on-primary">18 Pending</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">
+            Synthesized from spoken meeting transcripts. Review draft tickets, assignees, and target parameters before dispatching to Jira.
+          </p>
+</div>
+<!-- Quick Filters & Bulk Actions -->
+<div class="flex flex-wrap items-center gap-2.5">
+<!-- Filter Tabs -->
+<div class="inline-flex rounded-lg border border-outline-variant p-0.5 bg-surface-container-lowest text-label-sm font-label-sm">
+<button class="px-3 py-1.5 rounded-md bg-surface-container text-primary font-semibold shadow-xs" type="button">All (18)</button>
+<button class="px-3 py-1.5 rounded-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">High Priority (6)</button>
+<button class="px-3 py-1.5 rounded-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Engineering (8)</button>
+<button class="px-3 py-1.5 rounded-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Product (4)</button>
+<button class="px-3 py-1.5 rounded-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Requires Clarification (2)</button>
+</div>
+<!-- Bulk Approve CTA -->
+<button class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-secondary text-on-secondary font-label-md text-label-md hover:opacity-95 shadow-sm active:scale-[0.98] transition-transform" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="done_all">done_all</span>
+<span>Bulk Approve All (High Confidence)</span>
+</button>
+</div>
+</div>
+<!-- Action Items Items Container -->
+<div class="divide-y divide-outline-variant/70">
+<!-- ITEM 1: PROD-1842 -->
+<div class="p-space-md hover:bg-surface transition-colors flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="mt-1 flex items-center">
+<input checked="" class="rounded border-outline text-primary-container focus:ring-primary-container h-4 w-4" type="checkbox"/>
+</div>
+<div class="space-y-1.5">
+<div class="flex flex-wrap items-center gap-2">
+<span class="text-code-sm font-code-sm font-bold text-primary">PROD-1842</span>
+<span class="text-on-surface font-headline-sm text-body-lg font-semibold">Implement retry logic for Stripe webhook timeouts</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-container text-on-surface border border-outline-variant">Bug / Task</span>
+</div>
+<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm font-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="mic">mic</span>
+                  Source: <span class="text-on-surface font-medium">Backend Architecture Sync</span> · <span class="text-code-sm font-code-sm">10:24 AM</span>
+</span>
+<span>•</span>
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="account_circle">account_circle</span>
+                  Assignee: 
+                  <span class="inline-flex items-center gap-1 text-on-surface font-medium">
+<img class="w-4 h-4 rounded-full object-cover" data-alt="A portrait photograph of Alex Rivera, a Hispanic male software engineer in his late twenties wearing a charcoal crewneck sweater with glasses, set against an uncluttered, modern office background with subtle warm lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXIBwhA3CKkf8CUp0DdltcbqAHWsVUiD-b8bdXt79vLi_8rcKgWssUffVQ0HAv2XNoNW07drB7s25ifhYzZlrJaaxTgAP1Tnc5VhuFs-80bWgoQ3bzHg9E07JMMPglc_l2w2d4VKup8bodnUgIvIOF03sDXcHV_q1Jiez-yD8dVKI2F-feAGsMKQbty_OhcrTpNl3Dvknt9jw__CTP-8-yZmPhr1Hi9TqbHxvA9MuxlO0PlcifoQ2OgbAUaSnhwdRMVv_582cpcblY"/>
+                    Alex Rivera
+                  </span>
+</span>
+</div>
+</div>
+</div>
+<!-- Badges & Action Buttons -->
+<div class="flex flex-wrap items-center justify-between xl:justify-end gap-3 pl-8 xl:pl-0">
+<!-- Priority & Confidence Chips -->
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-rose-50 text-rose-700 border border-rose-200">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                High
+              </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="material-symbols-outlined text-[13px] text-emerald-700" data-icon="auto_awesome">auto_awesome</span>
+                99% AI Conf.
+              </span>
+</div>
+<!-- Workflow Buttons -->
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface text-label-md font-label-md transition-colors" type="button">Edit</button>
+<button class="p-1.5 rounded-lg border border-outline-variant hover:bg-red-50 hover:text-red-700 text-outline transition-colors" title="Reject item" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="close">close</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary font-label-md text-label-md shadow-sm transition-all active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="send">send</span>
+<span>Approve to Jira</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ITEM 2: DESIGN-409 -->
+<div class="p-space-md hover:bg-surface transition-colors flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="mt-1 flex items-center">
+<input checked="" class="rounded border-outline text-primary-container focus:ring-primary-container h-4 w-4" type="checkbox"/>
+</div>
+<div class="space-y-1.5">
+<div class="flex flex-wrap items-center gap-2">
+<span class="text-code-sm font-code-sm font-bold text-primary">DESIGN-409</span>
+<span class="text-on-surface font-headline-sm text-body-lg font-semibold">Update mobile bottom navigation bar states for dark mode</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-container text-on-surface border border-outline-variant">Story</span>
+</div>
+<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm font-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="mic">mic</span>
+                  Source: <span class="text-on-surface font-medium">Design Critique</span> · <span class="text-code-sm font-code-sm">Yesterday</span>
+</span>
+<span>•</span>
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="account_circle">account_circle</span>
+                  Assignee: 
+                  <span class="inline-flex items-center gap-1 text-on-surface font-medium">
+<img class="w-4 h-4 rounded-full object-cover" data-alt="A clean portrait of Mia Wang, a female UI designer in her late twenties with neat bob haircut and neutral attire, smiling warmly in a bright sunlit design studio setting with muted architectural tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDTuG66Md90Sse_MqqHk36CtHCL3UTrivb-4MtNFwpQWxuCtAAuulIL9yRuY9ugXuC99ce_6WbxVxhwtu99bDwokb0Ok_gQfHQ5O52hyIXL4M8P8W7FbtbTUltzRpYG6ne88LWi-nLDZ5Vg1WshGCQZ8fxvqx-3T9qh1-y942BOvBEfmp3sOTC2lYisNZHus8dBZzu6Aga3kkTvyXHRfwtbqOtIQd52rMTE1CQVx_p_ZXPHN2cx9x5paYVWF1ImIjerLw3RSEAjwk4"/>
+                    Mia Wang
+                  </span>
+</span>
+</div>
+</div>
+</div>
+<!-- Badges & Action Buttons -->
+<div class="flex flex-wrap items-center justify-between xl:justify-end gap-3 pl-8 xl:pl-0">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-amber-50 text-amber-800 border border-amber-200">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                Medium
+              </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="material-symbols-outlined text-[13px] text-emerald-700" data-icon="auto_awesome">auto_awesome</span>
+                96% AI Conf.
+              </span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface text-label-md font-label-md transition-colors" type="button">Edit</button>
+<button class="p-1.5 rounded-lg border border-outline-variant hover:bg-red-50 hover:text-red-700 text-outline transition-colors" title="Reject item" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="close">close</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary font-label-md text-label-md shadow-sm transition-all active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="send">send</span>
+<span>Approve to Jira</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ITEM 3: GROWTH-882 -->
+<div class="p-space-md hover:bg-surface transition-colors flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="mt-1 flex items-center">
+<input checked="" class="rounded border-outline text-primary-container focus:ring-primary-container h-4 w-4" type="checkbox"/>
+</div>
+<div class="space-y-1.5">
+<div class="flex flex-wrap items-center gap-2">
+<span class="text-code-sm font-code-sm font-bold text-primary">GROWTH-882</span>
+<span class="text-on-surface font-headline-sm text-body-lg font-semibold">Instrument Mixpanel funnels for onboarding checklist dropoff</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-container text-on-surface border border-outline-variant">Task</span>
+</div>
+<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm font-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="mic">mic</span>
+                  Source: <span class="text-on-surface font-medium">Weekly Growth &amp; RevOps</span> · <span class="text-code-sm font-code-sm">Jun 12</span>
+</span>
+<span>•</span>
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="account_circle">account_circle</span>
+                  Assignee: 
+                  <span class="inline-flex items-center gap-1 text-on-surface font-medium">
+<img class="w-4 h-4 rounded-full object-cover" data-alt="A portrait shot of Marcus Vance, an African-American product manager in his early thirties with a groomed beard and modern navy polo shirt, set in an airy high-tech conference room with warm indirect illumination." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiFb0gKTk-gdBKaSZiFZCx7jCOznEZWa06Ywft2AMgbmWwqiFHkbR1aTTyHz-HVZP4eHXeV41dktYgKkSDnuTjzLG3Rh13Gk9Jelnpr-u8kAm4F1wpREnWPANpCiHIeM63eXM8pX51WTeIQVaciIJK4OyoA27YrVFpzTgKSQsOXtk1c_JD8zCuGuq62ECt_PI4pUQMXAx2uOdIZWJNIS1v46HPLSsYebkV9uihaPdokIKsgGrGOrLJLaJXE2SobluQMYjBT4jm7tWc"/>
+                    Marcus Vance
+                  </span>
+</span>
+</div>
+</div>
+</div>
+<!-- Badges & Action Buttons -->
+<div class="flex flex-wrap items-center justify-between xl:justify-end gap-3 pl-8 xl:pl-0">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-rose-50 text-rose-700 border border-rose-200">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                High
+              </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="material-symbols-outlined text-[13px] text-emerald-700" data-icon="auto_awesome">auto_awesome</span>
+                94% AI Conf.
+              </span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface text-label-md font-label-md transition-colors" type="button">Edit</button>
+<button class="p-1.5 rounded-lg border border-outline-variant hover:bg-red-50 hover:text-red-700 text-outline transition-colors" title="Reject item" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="close">close</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary font-label-md text-label-md shadow-sm transition-all active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="send">send</span>
+<span>Approve to Jira</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ITEM 4: INFRA-301 -->
+<div class="p-space-md hover:bg-surface transition-colors flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="mt-1 flex items-center">
+<input checked="" class="rounded border-outline text-primary-container focus:ring-primary-container h-4 w-4" type="checkbox"/>
+</div>
+<div class="space-y-1.5">
+<div class="flex flex-wrap items-center gap-2">
+<span class="text-code-sm font-code-sm font-bold text-primary">INFRA-301</span>
+<span class="text-on-surface font-headline-sm text-body-lg font-semibold">Provision Redis caching cluster for session persistence</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-container text-on-surface border border-outline-variant">Sub-task</span>
+</div>
+<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm font-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="mic">mic</span>
+                  Source: <span class="text-on-surface font-medium">DevOps Standup</span> · <span class="text-code-sm font-code-sm">Jun 11</span>
+</span>
+<span>•</span>
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="account_circle">account_circle</span>
+                  Assignee: 
+                  <span class="inline-flex items-center gap-1 text-on-surface font-medium">
+<img class="w-4 h-4 rounded-full object-cover" data-alt="A portrait photograph of David K., a senior European infrastructure engineer in his forties wearing an olive casual button-down shirt, captured in a clean technology lab setting with subtle soft diffuse lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF6BEiEuxJXzVoSFEvmEuW1U6rfnSHC34qGBKAAPWGRJTpg-cGmwLdXczhRj6IdWTS1NpEhmaClicRcFY3IM4i_qWR0fQK8-DbQBoAUF5bz0aM7QSlPSHF5s7-lp3F-aOzKjnnFdO6fzwDPnPwgIGDR6d1_YVTWtPjts9a4DKbZOxfClys8O7pmnsZEzEi0PSCGQizA7BYaj82OyyJ31fi8C0f3KWEhakAZrlT2bufRYnK4ENOXp_KIvB5p5OUdtxqqAmfTbJedFFO"/>
+                    David K.
+                  </span>
+</span>
+</div>
+</div>
+</div>
+<!-- Badges & Action Buttons -->
+<div class="flex flex-wrap items-center justify-between xl:justify-end gap-3 pl-8 xl:pl-0">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-red-100 text-red-900 border border-red-300 font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-red-700"></span>
+                Critical
+              </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="material-symbols-outlined text-[13px] text-emerald-700" data-icon="auto_awesome">auto_awesome</span>
+                98% AI Conf.
+              </span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface text-label-md font-label-md transition-colors" type="button">Edit</button>
+<button class="p-1.5 rounded-lg border border-outline-variant hover:bg-red-50 hover:text-red-700 text-outline transition-colors" title="Reject item" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="close">close</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary font-label-md text-label-md shadow-sm transition-all active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="send">send</span>
+<span>Approve to Jira</span>
+</button>
+</div>
+</div>
+</div>
+<!-- ITEM 5: CORE-112 -->
+<div class="p-space-md hover:bg-surface transition-colors flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="mt-1 flex items-center">
+<input class="rounded border-outline text-primary-container focus:ring-primary-container h-4 w-4" type="checkbox"/>
+</div>
+<div class="space-y-1.5">
+<div class="flex flex-wrap items-center gap-2">
+<span class="text-code-sm font-code-sm font-bold text-primary">CORE-112</span>
+<span class="text-on-surface font-headline-sm text-body-lg font-semibold">Draft OpenAPI spec for v2 transcript webhooks</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-container text-on-surface border border-outline-variant">Story</span>
+</div>
+<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-body-sm font-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="mic">mic</span>
+                  Source: <span class="text-on-surface font-medium">API Guild Meeting</span> · <span class="text-code-sm font-code-sm">Jun 10</span>
+</span>
+<span>•</span>
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-amber-600" data-icon="help">help</span>
+                  Assignee: 
+                  <span class="inline-flex items-center gap-1 text-amber-800 font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    Unassigned (AI Suggested: Liam Patel)
+                  </span>
+</span>
+</div>
+</div>
+</div>
+<!-- Badges & Action Buttons -->
+<div class="flex flex-wrap items-center justify-between xl:justify-end gap-3 pl-8 xl:pl-0">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-surface-container text-on-surface-variant border border-outline-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                Low
+              </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-amber-50 text-amber-800 border border-amber-200">
+<span class="material-symbols-outlined text-[13px] text-amber-700" data-icon="warning">warning</span>
+                91% AI Conf.
+              </span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-surface-container text-on-surface text-label-md font-label-md transition-colors" type="button">Edit</button>
+<button class="p-1.5 rounded-lg border border-outline-variant hover:bg-red-50 hover:text-red-700 text-outline transition-colors" title="Reject item" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="close">close</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-container-high font-label-md text-label-md shadow-sm transition-all active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="send">send</span>
+<span>Assign &amp; Approve</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Table Footer Pagination & Sync Status -->
+<div class="p-space-md border-t border-outline-variant bg-surface flex flex-col sm:flex-row items-center justify-between gap-4">
+<span class="text-body-sm font-body-sm text-on-surface-variant">
+          Showing <span class="font-semibold text-on-surface">5</span> of <span class="font-semibold text-on-surface">18</span> action items awaiting validation
+        </span>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface-variant text-label-sm font-label-sm cursor-not-allowed opacity-60" type="button">Previous</button>
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest hover:bg-surface-container text-on-surface text-label-sm font-label-sm transition-colors" type="button">Next Page</button>
+</div>
+</div>
+</section>
+</main>
+<!-- FOOTER -->
+<footer class="w-full max-w-[1600px] mx-auto px-margin py-6 border-t border-outline-variant mt-12 flex flex-col sm:flex-row items-center justify-between text-body-sm text-on-surface-variant gap-4">
+<div class="flex items-center gap-3">
+<span class="text-headline-sm font-headline-sm font-bold text-on-surface">Minute AI</span>
+<span>•</span>
+<span>Enterprise Transcript Synthesizer v2.4</span>
+</div>
+<div class="flex items-center gap-6">
+<a class="hover:text-on-surface transition-colors" href="#">Jira Cloud Integration Docs</a>
+<a class="hover:text-on-surface transition-colors" href="#">API Keys</a>
+<a class="hover:text-on-surface transition-colors" href="#">Privacy &amp; Security</a>
+</div>
+</footer>
+</body></html>

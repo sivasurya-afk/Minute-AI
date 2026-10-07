@@ -6,8 +6,9 @@ from database.repositories import TranscriptRepository, ActionItemRepository, Pr
 from utils.transcript_parser import TranscriptParser
 from services.action_extractor import ActionExtractor
 from services.groq_service import GroqService
+from services.transcription_service import TranscriptionService
 from utils.auth import DEMO_USER
-from pages.process_transcript_page import _generate_offline_extracted_items
+from services.action_extractor import _generate_offline_extracted_items
 
 router = APIRouter(prefix="/api/transcripts", tags=["transcripts"])
 
@@ -129,22 +130,14 @@ async def process_file(
 
     # Handle Audio
     if ext in ["mp3", "wav", "m4a", "ogg", "flac"]:
-        if not groq_service.is_configured():
+        trans_service = TranscriptionService(groq_service)
+        if not trans_service.groq_service.is_configured():
             raise HTTPException(status_code=400, detail="Groq API key not configured for audio transcription.")
-        import tempfile
-        with tempfile.NamedTemporaryFile(suffix=f".{ext}", delete=False) as tmp:
-            tmp.write(content_bytes)
-            tmp_path = tmp.name
-
-        try:
-            success, raw_text, trans_err = groq_service.transcribe_audio(tmp_path)
-            if not success or not raw_text:
-                raise HTTPException(status_code=500, detail=f"Whisper transcription failed: {trans_err}")
-            source_type = "audio"
-        finally:
-            import os
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
+        success, raw_text_or_err = trans_service.transcribe_audio_bytes(content_bytes, filename)
+        if not success or not raw_text_or_err:
+            raise HTTPException(status_code=500, detail=f"Whisper transcription failed: {raw_text_or_err}")
+        raw_text = raw_text_or_err
+        source_type = "audio"
     else:
         # Text based
         try:

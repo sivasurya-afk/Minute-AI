@@ -18,10 +18,18 @@ def get_dashboard_summary(authorization: Optional[str] = Header(None)):
     p_repo = ProjectRepository()
     t_repo = TranscriptRepository()
 
-    metrics = a_repo.get_dashboard_metrics(user_id)
     all_items = a_repo.get_action_items(user_id)
     all_projects = p_repo.get_projects(user_id)
     transcripts = t_repo.get_transcripts(user_id)
+
+    metrics = {
+        "total_transcripts": len(transcripts),
+        "total_action_items": len(all_items),
+        "awaiting_review": len([i for i in all_items if i.get("status") == "Pending Review"]),
+        "requiring_clarification": len([i for i in all_items if i.get("status") == "Needs Clarification" or i.get("clarification_required")]),
+        "jira_projects_count": len(all_projects),
+        "approved_items": len([i for i in all_items if i.get("status") == "Approved"]),
+    }
 
     # Calculate chart breakdowns
     # 1. By Project

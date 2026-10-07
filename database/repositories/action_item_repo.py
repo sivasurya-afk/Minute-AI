@@ -5,9 +5,12 @@ Handles CRUD, filtering, searching, bulk insertion, and dynamic dashboard metric
 
 from typing import List, Dict, Any, Optional
 import uuid
+import logging
 from datetime import datetime
 from database.supabase_client import get_supabase_client, MockDatabase
 from database.repositories.project_repo import ProjectRepository
+
+logger = logging.getLogger(__name__)
 
 
 class ActionItemRepository:
@@ -28,73 +31,91 @@ class ActionItemRepository:
         items: List[Dict[str, Any]] = []
 
         if self.client:
-            query = self.client.table("action_items").select(
-                "*, jira_projects(project_name, project_key), transcripts(meeting_name, meeting_date)"
-            ).eq("user_id", user_id)
+            try:
+                query = self.client.table("action_items").select(
+                    "*, jira_projects(project_name, project_key), transcripts(meeting_name, meeting_date)"
+                ).eq("user_id", user_id)
 
-            if filters:
-                if filters.get("project_id"):
-                    query = query.eq("project_id", filters["project_id"])
-                if filters.get("assignee"):
-                    query = query.ilike("assignee", f"%{filters['assignee']}%")
-                if filters.get("priority"):
-                    query = query.eq("priority", filters["priority"])
-                if filters.get("status"):
-                    query = query.eq("status", filters["status"])
-                if filters.get("action_type"):
-                    query = query.eq("action_type", filters["action_type"])
-                if filters.get("transcript_id"):
-                    query = query.eq("transcript_id", filters["transcript_id"])
-
-            res = query.order("created_at", desc=True).execute()
-            raw_data = res.data or []
-
-            for row in raw_data:
-                jp = row.get("jira_projects") or {}
-                tr = row.get("transcripts") or {}
-                row["project_name"] = jp.get("project_name")
-                row["jira_project_key"] = row.get("jira_project_key") or jp.get("project_key")
-                row["meeting_name"] = tr.get("meeting_name")
-                row["meeting_date"] = tr.get("meeting_date")
-                items.append(row)
-        else:
-            # Mock fallback
-            raw_items = [
-                i for i in self.mock_db.action_items
-                if (i.get("user_id") == user_id or i.get("user_id") == "00000000-0000-0000-0000-000000000001")
-            ]
-            # Map relations
-            projects_map = {p["id"]: p for p in self.mock_db.projects}
-            transcripts_map = {t["id"]: t for t in self.mock_db.transcripts}
-
-            for item in raw_items:
-                item_copy = dict(item)
-                proj = projects_map.get(item_copy.get("project_id"))
-                tran = transcripts_map.get(item_copy.get("transcript_id"))
-                if proj:
-                    item_copy["project_name"] = proj.get("project_name")
-                    if not item_copy.get("jira_project_key"):
-                        item_copy["jira_project_key"] = proj.get("project_key")
-                if tran:
-                    item_copy["meeting_name"] = tran.get("meeting_name")
-                    item_copy["meeting_date"] = str(tran.get("meeting_date", ""))
-
-                # Apply filters
                 if filters:
-                    if filters.get("project_id") and item_copy.get("project_id") != filters["project_id"]:
-                        continue
-                    if filters.get("assignee") and (filters["assignee"].lower() not in (item_copy.get("assignee") or "").lower()):
-                        continue
-                    if filters.get("priority") and item_copy.get("priority") != filters["priority"]:
-                        continue
-                    if filters.get("status") and item_copy.get("status") != filters["status"]:
-                        continue
-                    if filters.get("action_type") and item_copy.get("action_type") != filters["action_type"]:
-                        continue
-                    if filters.get("transcript_id") and item_copy.get("transcript_id") != filters["transcript_id"]:
-                        continue
+                    if filters.get("project_id"):
+                        query = query.eq("project_id", filters["project_id"])
+                    if filters.get("assignee"):
+                        query = query.ilike("assignee", f"%{filters['assignee']}%")
+                    if filters.get("priority"):
+                        query = query.eq("priority", filters["priority"])
+                    if filters.get("status"):
+                        query = query.eq("status", filters["status"])
+                    if filters.get("action_type"):
+                        query = query.eq("action_type", filters["action_type"])
+                    if filters.get("transcript_id"):
+                        query = query.eq("transcript_id", filters["transcript_id"])
 
-                items.append(item_copy)
+                res = query.order("created_at", desc=True).execute()
+                raw_data = res.data or []
+
+                if raw_data or user_id != "00000000-0000-0000-0000-000000000001":
+                    for row in raw_data:
+                        jp = row.get("jira_projects") or {}
+                        tr = row.get("transcripts") or {}
+                        row["project_name"] = jp.get("project_name")
+                        row["jira_project_key"] = row.get("jira_project_key") or jp.get("project_key")
+                        row["meeting_name"] = tr.get("meeting_name")
+                        row["meeting_date"] = tr.get("meeting_date")
+                        items.append(row)
+
+                    if search and search.strip():
+                        query_str = search.strip().lower()
+                        items = [
+                            item for item in items
+                            if (
+                                query_str in (item.get("action_title") or "").lower()
+                                or query_str in (item.get("description") or "").lower()
+                                or query_str in (item.get("assignee") or "").lower()
+                                or query_str in (item.get("source_excerpt") or "").lower()
+                                or query_str in (item.get("jira_project_key") or "").lower()
+                            )
+                        ]
+                    return items
+            except Exception as e:
+                logger.warning(f"Supabase get_action_items failed, falling back to mock database: {e}")
+
+        # Mock fallback
+        raw_items = [
+            i for i in self.mock_db.action_items
+            if (i.get("user_id") == user_id or i.get("user_id") == "00000000-0000-0000-0000-000000000001")
+        ]
+        # Map relations
+        projects_map = {p["id"]: p for p in self.mock_db.projects}
+        transcripts_map = {t["id"]: t for t in self.mock_db.transcripts}
+
+        for item in raw_items:
+            item_copy = dict(item)
+            proj = projects_map.get(item_copy.get("project_id"))
+            tran = transcripts_map.get(item_copy.get("transcript_id"))
+            if proj:
+                item_copy["project_name"] = proj.get("project_name")
+                if not item_copy.get("jira_project_key"):
+                    item_copy["jira_project_key"] = proj.get("project_key")
+            if tran:
+                item_copy["meeting_name"] = tran.get("meeting_name")
+                item_copy["meeting_date"] = str(tran.get("meeting_date", ""))
+
+            # Apply filters
+            if filters:
+                if filters.get("project_id") and item_copy.get("project_id") != filters["project_id"]:
+                    continue
+                if filters.get("assignee") and (filters["assignee"].lower() not in (item_copy.get("assignee") or "").lower()):
+                    continue
+                if filters.get("priority") and item_copy.get("priority") != filters["priority"]:
+                    continue
+                if filters.get("status") and item_copy.get("status") != filters["status"]:
+                    continue
+                if filters.get("action_type") and item_copy.get("action_type") != filters["action_type"]:
+                    continue
+                if filters.get("transcript_id") and item_copy.get("transcript_id") != filters["transcript_id"]:
+                    continue
+
+            items.append(item_copy)
 
         # Apply text search across title, description, and source excerpt
         if search and search.strip():
@@ -148,8 +169,11 @@ class ActionItemRepository:
             return []
 
         if self.client:
-            res = self.client.table("action_items").insert(records_to_insert).execute()
-            return res.data or records_to_insert
+            try:
+                res = self.client.table("action_items").insert(records_to_insert).execute()
+                return res.data or records_to_insert
+            except Exception as e:
+                logger.warning(f"Supabase bulk_create_action_items failed, falling back to mock database: {e}")
 
         self.mock_db.action_items.extend(records_to_insert)
         return records_to_insert
@@ -168,14 +192,18 @@ class ActionItemRepository:
             update_data["clarification_required"] = False
 
         if self.client:
-            res = (
-                self.client.table("action_items")
-                .update(update_data)
-                .eq("id", item_id)
-                .eq("user_id", user_id)
-                .execute()
-            )
-            return res.data[0] if res.data else update_data
+            try:
+                res = (
+                    self.client.table("action_items")
+                    .update(update_data)
+                    .eq("id", item_id)
+                    .eq("user_id", user_id)
+                    .execute()
+                )
+                if res.data:
+                    return res.data[0]
+            except Exception as e:
+                logger.warning(f"Supabase update_action_item_status failed: {e}")
 
         for i in self.mock_db.action_items:
             if i["id"] == item_id:
@@ -188,14 +216,18 @@ class ActionItemRepository:
         fields["updated_at"] = datetime.now().isoformat()
 
         if self.client:
-            res = (
-                self.client.table("action_items")
-                .update(fields)
-                .eq("id", item_id)
-                .eq("user_id", user_id)
-                .execute()
-            )
-            return res.data[0] if res.data else fields
+            try:
+                res = (
+                    self.client.table("action_items")
+                    .update(fields)
+                    .eq("id", item_id)
+                    .eq("user_id", user_id)
+                    .execute()
+                )
+                if res.data:
+                    return res.data[0]
+            except Exception as e:
+                logger.warning(f"Supabase update_action_item_fields failed: {e}")
 
         for i in self.mock_db.action_items:
             if i["id"] == item_id:
@@ -206,14 +238,17 @@ class ActionItemRepository:
     def delete_action_items_by_transcript(self, user_id: str, transcript_id: str) -> int:
         """Delete all action items associated with a transcript (e.g. during reprocessing)."""
         if self.client:
-            res = (
-                self.client.table("action_items")
-                .delete()
-                .eq("transcript_id", transcript_id)
-                .eq("user_id", user_id)
-                .execute()
-            )
-            return len(res.data) if res.data else 0
+            try:
+                res = (
+                    self.client.table("action_items")
+                    .delete()
+                    .eq("transcript_id", transcript_id)
+                    .eq("user_id", user_id)
+                    .execute()
+                )
+                return len(res.data) if res.data else 0
+            except Exception as e:
+                logger.warning(f"Supabase delete_action_items_by_transcript failed: {e}")
 
         initial_len = len(self.mock_db.action_items)
         self.mock_db.action_items = [
@@ -235,10 +270,15 @@ class ActionItemRepository:
         projects = self.project_repo.get_projects(user_id)
 
         # Transcripts count
+        total_transcripts = 0
         if self.client:
-            res_t = self.client.table("transcripts").select("id", count="exact").eq("user_id", user_id).execute()
-            total_transcripts = res_t.count or len(res_t.data or [])
-        else:
+            try:
+                res_t = self.client.table("transcripts").select("id", count="exact").eq("user_id", user_id).execute()
+                total_transcripts = res_t.count or len(res_t.data or [])
+            except Exception as e:
+                logger.warning(f"Supabase get_dashboard_metrics transcript count failed: {e}")
+
+        if not total_transcripts:
             total_transcripts = len([
                 t for t in self.mock_db.transcripts
                 if (t.get("user_id") == user_id or t.get("user_id") == "00000000-0000-0000-0000-000000000001")
